@@ -1,0 +1,2 @@
+# Start zookeeper
+# /opt/zookeeper/bin/zkServer.sh start
