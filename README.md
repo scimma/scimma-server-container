@@ -1,6 +1,6 @@
 ## SCIMMA Server Container
 
-The SCIMMA Server Container provides a development version of the SCIMMA serverinfrastructure which includes:
+The SCIMMA Server Container provides a development version of the SCIMMA server infrastructure which includes:
 
     1. A Kafka server.
     2. A Zookeeper installation used by the Kafka server
@@ -11,6 +11,10 @@ The SCIMMA Server Container is intended to be useful for:
     1. SCIMMA integration testing
     2. SCIMMA development 
     3. SCIMMA client (both producer and consumer) development
+
+The SCIMMA Server Container is most definitely **NOT** an example of 
+best practice kafka infrastructure implementation. These
+containers are for testing, not for production.
 
 ## Prerequisites:
 
@@ -40,7 +44,9 @@ Build the containers using GNU make:
 
 Run the scimma-server service:
 
+``` sh
    docker-compose up -d scimma-server
+```
 
 This starts the scimma server container in the background. You can verify that it is running
 with:
@@ -49,14 +55,19 @@ with:
    
 Run the scimma-client service:
 
+``` sh
     docker-compose run scimma-client
+```
 
-This starts the scimma client container in the foreground.
+This starts the scimma client container in the foreground. You will immediately get a shell in the scimma
+client container.
 
 Because the containers were strarted using docker-compose, some 
 network names exist. In the client you can do:
 
+``` sh
         nslookup scimma-server
+```
 
 and you should see output like:
 
@@ -75,7 +86,9 @@ Address: 172.19.0.2
 
 Run:
 
+``` sh
         ./kafka-console-producer.sh --broker-list scimma-server:9092 --topic=test
+```
 
 and enter several messages one per line. The content is not important. You may see
 some java warnings. As long as the kafka-console-producer.sh continues to read
@@ -99,11 +112,15 @@ You can run a second shell on the scimma/client container.
 Leave the window with ./kafka-console-consumer.sh running.
 In another window (as root), run:
 
+``` sh
     docker ps
+```
 
 to find the container id of the scimma/client container. Then, as root, run:
 
+``` sh
    docker exec -it CONTAINER_ID /bin/bash
+```
 
 where CONTAINER_ID is the container id of the scimma/client container. You can now run the ./kafka-console-producer.sh 
 as above in one of the windows and ./kafka-console-consumer.sh as above in the other.
@@ -133,7 +150,7 @@ your docker server.
 Do this once:
 
 ```sh
-	docker-machine create --driver virtualbox scimma
+    docker-machine create --driver virtualbox scimma
 ```
 
 Do this, as root, every time that you run a new shell (open a new window) in which you want to run docker commands associated with the scimma containers:
@@ -148,7 +165,6 @@ You can run ``docker-machine env dev`` on the command line to see what would be 
 
 There were no issues running the above command.
 
-
 ## TO DO
 
-The plan is, as the 
+The plan is, as server and client code is written, to add the client code to the scimma client container and the server code to the scimma server container.
