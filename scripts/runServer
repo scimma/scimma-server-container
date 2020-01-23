@@ -13,8 +13,8 @@ $|++; # autoflush stdout
 
 my($G_Terminate) = 0;
 $SIG{'TERM'}  = \&handleTerm;
+$SIG{'INT'}   = \&handleTerm;
 $SIG{'HUP'}   = \&ignoreSignal;
-$SIG{'INT'}   = \&ignoreSignal;
 $SIG{'SEGV'}  = \&ignoreSignal;
 $SIG{'ABRT'}  = \&ignoreSignal;
 $SIG{'BUS'}   = \&ignoreSignal;
@@ -52,7 +52,7 @@ printf("IP ADDRESS OF SERVER: %s\n", $ip);
 while (1) {
     if ($G_Terminate) {
 	for $t (@threads) {
-	    $t->kill('SIGTERM');
+      	    $t->kill('SIGTERM');
 	}
 	exit(0);
     }
