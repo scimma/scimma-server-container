@@ -9,6 +9,8 @@ use strict;
 use threads;
 use threads::shared;
 
+$|++; # autoflush stdout
+
 my($G_Terminate) = 0;
 $SIG{'TERM'}  = \&handleTerm;
 $SIG{'HUP'}   = \&ignoreSignal;
