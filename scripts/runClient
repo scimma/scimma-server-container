@@ -2,6 +2,7 @@
 use warnings;
 use strict;
 use Getopt::Long;
+use FileHandle;
 
 my($opt_Help);
 my($opt_ServerString);
@@ -46,9 +47,12 @@ if (defined($opt_Help)) {
     exit(0);
 }
 
-my($serverString) = "127.0.0.2:9092";
+my($serverString);
 if (defined($opt_ServerString)) {
     $serverString = $opt_ServerString;
+} else {
+    printf("No server string supplied. Exiting.\n\n");
+    exit(-1);
 }
 
 my($topic) = "test";
@@ -61,16 +65,19 @@ printf("Topic: %s\n", $topic);
 printf("Command: %s\n", $cmd);
 printf("Kafka Command: %s\n", $fullCommand->{$cmd});
 
+my($serverIp, $serverPort) = parseServerString($serverString);
+updateHosts($serverIp);
+
 my($commandToRun);
 
 if ($cmd eq 'consumer') {
     printf("Messages for topic \"%s\" on server \"%s\"\n", $topic, $serverString);
-    $commandToRun = sprintf("%s --bootstrap-server %s --topic '%s' --from-beginning", $fullCommand->{$cmd},
-			    $serverString, $topic);
+    $commandToRun = sprintf("%s --bootstrap-server kafka-server:%s --topic '%s' --from-beginning", $fullCommand->{$cmd},
+			    $serverPort, $topic);
 } elsif ($cmd eq 'producer') {
     printf("Enter one line per message:\n");
-    $commandToRun = sprintf("%s --broker-list %s --topic '%s'", $fullCommand->{$cmd},
-			    $serverString, $topic);    
+    $commandToRun = sprintf("%s --broker-list kafka-server:%s --topic '%s'", $fullCommand->{$cmd},
+			    $serverPort, $topic);    
 }
 
 system($commandToRun);
@@ -93,4 +100,22 @@ sub printUsage {
     printf("This container has a full kafka client installation and, by default\n");
     printf("runs a thin wrapper around docker shell scripts and tries to be helpful.\n");
     printf("\n");
+}
+
+sub parseServerString {
+    my($s) = shift;
+    my($ip);
+    if ($s =~ /^(\S+):([0-9]+)$/) {
+	return ($1, $2);
+    } else {
+	printf("Could not parse server string: %s\n", $s);
+	printf("Exiting.\n");
+	exit(-1);
+    }
+}
+
+sub updateHosts {
+    my($ip) = shift;
+    my($echoCmd) = sprintf("echo '%s  kafka-server' >> /etc/hosts", $ip);
+    `$echoCmd`;
 }
