@@ -1,2 +1,76 @@
-# Start zookeeper
-# /opt/zookeeper/bin/zkServer.sh start
+#!/usr/bin/perl
+###
+### Run the container programs. 
+### Handle signals.
+### Restart container programs that die (after a sleep).
+###
+use warnings;
+use strict;
+use threads;
+use threads::shared;
+
+my($G_Terminate) = 0;
+$SIG{'TERM'}  = \&handleTerm;
+$SIG{'HUP'}   = \&ignoreSignal;
+$SIG{'INT'}   = \&ignoreSignal;
+$SIG{'SEGV'}  = \&ignoreSignal;
+$SIG{'ABRT'}  = \&ignoreSignal;
+$SIG{'BUS'}   = \&ignoreSignal;
+$SIG{'FPE'}   = \&ignoreSignal;
+$SIG{'PIPE'}  = \&ignoreSignal;
+$SIG{'ALRM'}  = \&ignoreSignal;
+my($zk);
+$zk->{'dir'}    = '/opt/apache-zookeeper';
+$zk->{'name'}   = 'zk';
+$zk->{'cmd'}    = '/opt/apache-zookeeper/bin/zkServer.sh start';
+$zk->{'starts'} = 0;
+
+$kafka->{'dir'}    = '/opt/kafka';
+$kafka->{'name'}   = 'kafka';
+$kafka->{'cmd'}    = '/opt/kafka/bin/kafka-server-start.sh config/server.properties';
+$kafka->{'starts'} = 0;
+
+##
+## Create threads.
+##
+my($t, @threads);
+push(@threads, threads->create(\&runCommand, $zk));
+push(@threads, threads->create(\&runCommand, $kafka));
+
+##
+## Monitor threads.
+##
+## TODO: maybe check thread state and restart threads that have died.
+##
+while (1) {
+    if ($G_Terminate) {
+	for $t (@threads) {
+	    $t->kill('SIGTERM');
+	}
+	exit(0);
+    }
+}
+
+printf("Exiting outside of monitor loop. This should never happen.");
+exit(-1);
+
+###
+### Not reached.
+###
+sub runCommand {
+    my($cObj) = shift;
+    my($numStarts) = 0;
+    my($oLog, $eLog);
+    while (1) {
+	$numStarts ++;
+	$oLog = sprintf("/var/log/%s.out.%d", $cObj->{'name'}, $numStarts);
+	$eLog = sprintf("/var/log/%s.err.%d", $cObj->{'name'}, $numStarts);
+	system("cd %s && (%s > %s 2> %s) ", $cObj->{'dir'}, $cObj->{'cmd'}, $oLog, $eLog);
+	sleep(5);
+    }   
+}
+
+sub handleTerm {
+    printf("Received SIGTERM, exiting.\n");
+    $G_Terminate = 1;
+}
