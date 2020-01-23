@@ -13,6 +13,7 @@ GetOptions("help"     => \$opt_Help,
 
 my($cmd) = $ARGV[0];
 if (!defined($cmd)) {
+    printf("No Command.\n");
     printUsage();
     exit(0);
 }
@@ -27,6 +28,7 @@ my($cFound) = 0;
 for $c (@commands) {
     if ($c =~ /^$cmd/) {
 	$cmd = $c;
+	$cFound = 1;
 	last;
     }
 }
@@ -86,7 +88,7 @@ sub printUsage {
     printf("a string with no spaces. SERVER_STRING is of the form\n\n");
     printf("      HOST:PORT\n\n");
     printf("The default SERVER_STRING is \"127.0.0.2\". The default topic is\n");
-    printf("\"test\". The COMMAND string is not optional. Running the container");
+    printf("\"test\". The COMMAND string is not optional. Running the container\n");
     printf("without a COMMAND prints this usage message.\n\n");
     printf("This container has a full kafka client installation and, by default\n");
     printf("runs a thin wrapper around docker shell scripts and tries to be helpful.\n");
