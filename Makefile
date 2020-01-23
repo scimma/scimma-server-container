@@ -7,7 +7,7 @@ CURL := /usr/bin/curl
 ## ZOO
 ##
 ZOO_VER   := 3.5.6
-ZOO_TGZ   := apache-zookeeper-$(ZOO_VER).tar.gz
+ZOO_TGZ   := apache-zookeeper-$(ZOO_VER)-bin.tar.gz
 ZOO_URL   := http://apache.cs.utah.edu/zookeeper/zookeeper-$(ZOO_VER)/$(ZOO_TGZ)
 
 ##
