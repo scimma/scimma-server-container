@@ -126,7 +126,23 @@ The containers have been tested using:
 ```
      The docker-compose provided by mac ports did not work when tested.
 
-In order to run Docker commands, that is, to have a working 
+In order to run Docker commands, that is, to have a working docker installation
+when using docker from Mac Ports and VirtualBox, you will need to manually setup
+your docker server.
+
+Do this once:
+
+```sh
+	docker-machine create --driver virtualbox scimma
+```
+
+Do this, as root, every time that you run a new shell (open a new window) in which you want to run docker commands associated with the scimma containers:
+
+```
+        eval $(docker-machine env scimma)
+```
+
+You can run ``docker-machine env dev`` on the command line to see what would be eavluated.
 
 ## Linux Specific Notes
 
