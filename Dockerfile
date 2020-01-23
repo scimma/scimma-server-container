@@ -10,5 +10,5 @@ COPY etc/kafka/server.properties /opt/kafka/config/server.properties
 COPY scripts/runServer /root/runServer
 RUN  chmod ugo+rx /root/runServer
 WORKDIR /tmp
-EXPOSE 9090/tcp
+EXPOSE 9092/tcp
 ENTRYPOINT ["/root/runServer"]
