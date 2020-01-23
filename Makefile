@@ -39,11 +39,11 @@ print-%  : ; @echo $* = $($*)
 downloads:
 	mkdir -p downloads
 
-client: Dockerfile.client $(KAFKA_TGZ)
+client: Dockerfile.client downloads/$(KAFKA_TGZ)
 	@if [ ! -z "$$(git status --porcelain)" ]; then echo "Directory is not clean. Commit your changes."; exit 1; fi
 	docker build -f $< -t $(CLI_IMG)
 
-server: Dockerfile.server $(ZOO_TGZ) $(KAFKA_TGZ)
+server: Dockerfile.server downloads/$(ZOO_TGZ) downloads/$(KAFKA_TGZ)
 	@if [ ! -z "$$(git status --porcelain)" ]; then echo "Directory is not clean. Commit your changes."; exit 1; fi
 	docker build -f $< -t $(SRV_IMG) .
 
