@@ -14,13 +14,14 @@ The SCIMMA Server Container is intended to be useful for:
 
 ## Prerequisites:
 
+        0. VirtualBox (Mac Only)
         1. Build tools: GNU Make, curl, git
         2. Working docker installation
         3. Working docker-compose installation
 
 ## Download
 
-Clone the git SCIMMA git repository:
+Clone the SCIMMA server git repository:
 
 ```
    git clone git@github.com:scimma/scimma-server-container.git
@@ -109,3 +110,29 @@ as above in one of the windows and ./kafka-console-consumer.sh as above in the o
 
 When you type a message in the window running kafka-console-producer.sh, you should see the message appear
 in the window running kafka-console-consumer.sh righ after you hit return.
+
+
+## Mac Specific Notes
+
+The containers have been tested using:
+
+    1. The built-in make, curl, and git in macOS Catalina 10.15.1.
+    2. Docker from mac ports (https://www.macports.org/)
+    3. Docker compose downloaded via:
+
+``` sh
+           curl -L https://github.com/docker/compose/releases/download/1.25.3/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+           chmod +x /usr/local/bin/docker-compose
+```
+     The docker-compose provided by mac ports did not work when tested.
+
+In order to run Docker commands, that is, to have a working 
+
+## Linux Specific Notes
+
+There were no issues running the above command.
+
+
+## TO DO
+
+The plan is, as the 
