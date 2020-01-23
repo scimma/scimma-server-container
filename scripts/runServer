@@ -39,6 +39,8 @@ my($t, @threads);
 push(@threads, threads->create(\&runCommand, $zk));
 push(@threads, threads->create(\&runCommand, $kafka));
 
+system("/sbin/ifconfig");
+
 ##
 ## Monitor threads.
 ##
