@@ -39,7 +39,8 @@ my($t, @threads);
 push(@threads, threads->create(\&runCommand, $zk));
 push(@threads, threads->create(\&runCommand, $kafka));
 
-system("/sbin/ifconfig");
+my($ip) = getIpAddress();
+printf("IP ADDRESS OF SERVER: %s\n", $ip);
 
 ##
 ## Monitor threads.
@@ -83,4 +84,21 @@ sub ignoreSignal {
     my($signal) = shift;
     printf("Received signal: %s -- ignoring...\n", $signal);
     printf("To kill: docker kill --signal=SIGTERM CONTAINER_ID\n\n");
+}
+
+sub getIpAddress {
+    my(@netinfo) = `/sbin/ifconfig`;
+    my($line);
+    my($ip) = "UNKNOWN";
+    while ($line = shift(@netinfo)) {
+	chomp($line);
+	if ($line =~ /^eth0\s+/) {
+	    $line = shift(@netinfo);
+	    if ($line =~ /^\s+inet\s+(\S+)\s+netmask\s+(\S+)\s+broadcast\s+(\S+)\s*$/) {
+		$ip = $1;
+		last;
+	    }
+	}
+    }
+    return $ip;
 }
