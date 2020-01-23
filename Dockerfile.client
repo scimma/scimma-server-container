@@ -4,5 +4,6 @@ RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.n
 ADD downloads/kafka_*.tgz /opt
 RUN ln -s /opt/kafka_* /opt/kafka 
 COPY scripts/runClient /root/runClient
+RUN chmod ugo+rx /root/runClient
 WORKDIR /tmp
 ENTRYPOINT ["/root/runClient"]

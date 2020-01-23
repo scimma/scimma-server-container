@@ -42,10 +42,12 @@ downloads:
 client: Dockerfile.client downloads/$(KAFKA_TGZ)
 	@if [ ! -z "$$(git status --porcelain)" ]; then echo "Directory is not clean. Commit your changes."; exit 1; fi
 	docker build -f $< -t $(CLI_IMG) .
+	docker tag $(CLI_IMG) $(CLI_STST)
 
 server: Dockerfile.server downloads/$(ZOO_TGZ) downloads/$(KAFKA_TGZ)
 	@if [ ! -z "$$(git status --porcelain)" ]; then echo "Directory is not clean. Commit your changes."; exit 1; fi
 	docker build -f $< -t $(SRV_IMG) .
+	docker tag $(SRV_IMG) $(SRV_LTST)
 
 downloads/$(ZOO_TGZ): downloads
 	$(CURL) -s -o downloads/$(ZOO_TGZ) $(ZOO_URL)
