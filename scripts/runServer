@@ -76,3 +76,9 @@ sub handleTerm {
     printf("Received SIGTERM, exiting.\n");
     $G_Terminate = 1;
 }
+
+sub ignoreSignal {
+    my($signal) = shift;
+    printf("Received signal: %s -- ignoring...\n", $signal);
+    printf("To kill: docker kill --signal=SIGTERM CONTAINER_ID\n\n");
+}
