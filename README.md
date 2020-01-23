@@ -12,7 +12,21 @@ The SCIMMA Server Container is intended to be useful for:
     2. SCIMMA development 
     3. SCIMMA client (both producer and consumer) development
 
-## Installation
+## Prerequisites:
+
+        1. Operating system: Mac/Linux (on Windows, run in a Linux virtual machine).
+        1. working docker
+        2. working docker-compose
+        3. git
+
+## Download and Build:
+
+```
+   git clone git@github.com:scimma/scimma-server-container.git
+   cd scimma-server-container
+   make
+```
+
 
 ## Running
 
