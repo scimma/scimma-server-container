@@ -40,6 +40,9 @@ Build the containers using GNU make:
    make
 ```
 
+The ``make``step is not strictly necessary. If you don't run make, and you continue
+to the next stop, docker-compose will get the containers from dockerhub.com.
+
 ## Verify the Installation
 
 Run the scimma-server service:
@@ -141,7 +144,8 @@ The containers have been tested using:
            curl -L https://github.com/docker/compose/releases/download/1.25.3/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
            chmod +x /usr/local/bin/docker-compose
 ```
-     The docker-compose provided by mac ports did not work when tested.
+
+The docker-compose provided by mac ports did not work when tested.
 
 In order to run Docker commands, that is, to have a working docker installation
 when using docker from Mac Ports and VirtualBox, you will need to manually setup
@@ -152,6 +156,13 @@ Do this once:
 ```sh
     docker-machine create --driver virtualbox scimma
 ```
+
+Do this after ever reboot:
+
+```sh
+    docker-machine start scimma
+```
+
 
 Do this, as root, every time that you run a new shell (open a new window) in which you want to run docker commands associated with the scimma containers:
 
