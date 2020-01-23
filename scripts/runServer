@@ -19,12 +19,14 @@ $SIG{'BUS'}   = \&ignoreSignal;
 $SIG{'FPE'}   = \&ignoreSignal;
 $SIG{'PIPE'}  = \&ignoreSignal;
 $SIG{'ALRM'}  = \&ignoreSignal;
+
 my($zk);
 $zk->{'dir'}    = '/opt/apache-zookeeper';
 $zk->{'name'}   = 'zk';
 $zk->{'cmd'}    = '/opt/apache-zookeeper/bin/zkServer.sh start';
 $zk->{'starts'} = 0;
 
+my($kafka);
 $kafka->{'dir'}    = '/opt/kafka';
 $kafka->{'name'}   = 'kafka';
 $kafka->{'cmd'}    = '/opt/kafka/bin/kafka-server-start.sh config/server.properties';
@@ -65,7 +67,7 @@ sub runCommand {
 	$numStarts ++;
 	$oLog = sprintf("/var/log/%s.out.%d", $cObj->{'name'}, $numStarts);
 	$eLog = sprintf("/var/log/%s.err.%d", $cObj->{'name'}, $numStarts);
-	system("cd %s && (%s > %s 2> %s) ", $cObj->{'dir'}, $cObj->{'cmd'}, $oLog, $eLog);
+	system(sprintf("cd %s && (%s > %s 2> %s) ", $cObj->{'dir'}, $cObj->{'cmd'}, $oLog, $eLog));
 	sleep(5);
     }   
 }
