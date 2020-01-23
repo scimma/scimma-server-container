@@ -96,6 +96,7 @@ sub getIpAddress {
 	chomp($line);
 	if ($line =~ /^eth0\s+/) {
 	    $line = shift(@netinfo);
+	    printf("LINE: %s\n", $line);
 	    if ($line =~ /^\s+inet\s+(\S+)\s+netmask\s+(\S+)\s+broadcast\s+(\S+)\s*$/) {
 		$ip = $1;
 		last;
