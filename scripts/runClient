@@ -44,7 +44,7 @@ if (defined($opt_Help)) {
     exit(0);
 }
 
-my($serverString = "127.0.0.2:9092";
+my($serverString) = "127.0.0.2:9092";
 if (defined($opt_ServerString)) {
     $serverString = $opt_ServerString;
 }
@@ -62,7 +62,7 @@ printf("Kafka Command: %s\n", $fullCommand->{$cmd});
 my($commandToRun);
 
 if ($cmd eq 'consumer') {
-    printf("Messages for topic \"%s\" on server \"%s\"\n", $topic, $server);
+    printf("Messages for topic \"%s\" on server \"%s\"\n", $topic, $serverString);
     $commandToRun = sprintf("%s --bootstrap-server %s --topic '%s' --from-beginning", $fullCommand->{$cmd},
 			    $serverString, $topic);
 } elsif ($cmd eq 'producer') {
