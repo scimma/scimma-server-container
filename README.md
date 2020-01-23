@@ -14,22 +14,98 @@ The SCIMMA Server Container is intended to be useful for:
 
 ## Prerequisites:
 
-        1. Operating system: Mac/Linux (on Windows, run in a Linux virtual machine).
-        1. working docker
-        2. working docker-compose
-        3. git
+        1. Build tools: GNU Make, curl, git
+        2. Working docker installation
+        3. Working docker-compose installation
 
-## Download and Build:
+## Download
+
+Clone the git SCIMMA git repository:
 
 ```
    git clone git@github.com:scimma/scimma-server-container.git
+```
+
+## Build
+
+Build the containers using GNU make:
+
+```
    cd scimma-server-container
    make
 ```
 
+## Verify the Installation
 
-## Running
+Run the scimma-server service:
 
+   docker-compose up -d scimma-server
 
+This starts the scimma server container in the background. You can verify that it is running
+with:
 
+        docker ps
+   
+Run the scimma-client service:
 
+    docker-compose run scimma-client
+
+This starts the scimma client container in the foreground.
+
+Because the containers were strarted using docker-compose, some 
+network names exist. In the client you can do:
+
+        nslookup scimma-server
+
+and you should see output like:
+
+``` sh
+root@ef7b388c7359 bin]# nslookup scimma-server
+Server:         127.0.0.11
+Address:        127.0.0.11#53
+
+Non-authoritative answer:
+Name:   scimma-server
+Address: 172.19.0.2
+
+```
+
+## Send some test message:
+
+Run:
+
+        ./kafka-console-producer.sh --broker-list scimma-server:9092 --topic=test
+
+and enter several messages one per line. The content is not important. You may see
+some java warnings. As long as the kafka-console-producer.sh continues to read
+standard input, you can ignore the messages.
+
+When you are done entering messages, type Ctrl-d.
+
+## Receive the messages.
+
+Run the command (in the scimma-client container):
+
+``` sh
+    ./kafka-console-consumer.sh --bootstrap-server scimma-server:9092 --topic=test --from-beginning
+```
+You should see the messages that you sent.
+
+## Extra credit
+
+You can run a second shell on the scimma/client container.
+
+Leave the window with ./kafka-console-consumer.sh running.
+In another window (as root), run:
+
+    docker ps
+
+to find the container id of the scimma/client container. Then, as root, run:
+
+   docker exec -it CONTAINER_ID /bin/bash
+
+where CONTAINER_ID is the container id of the scimma/client container. You can now run the ./kafka-console-producer.sh 
+as above in one of the windows and ./kafka-console-consumer.sh as above in the other.
+
+When you type a message in the window running kafka-console-producer.sh, you should see the message appear
+in the window running kafka-console-consumer.sh righ after you hit return.
