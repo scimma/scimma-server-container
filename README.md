@@ -85,7 +85,7 @@ Address: 172.19.0.2
 
 ```
 
-## Send some test message:
+## Send some test messages:
 
 Run:
 
