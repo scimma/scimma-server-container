@@ -172,7 +172,7 @@ Do this, as root, every time that you run a new shell (open a new window) in whi
 
 You can run ``docker-machine env dev`` on the command line to see what would be eavluated.
 
-## WIndows Specific Notes
+## Windows Specific Notes
 
 Tested on a Windows 10 Pro machine with [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/install-win10) installed.
 
