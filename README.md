@@ -129,7 +129,7 @@ where CONTAINER_ID is the container id of the scimma/client container. You can n
 as above in one of the windows and ./kafka-console-consumer.sh as above in the other.
 
 When you type a message in the window running kafka-console-producer.sh, you should see the message appear
-in the window running kafka-console-consumer.sh righ after you hit return.
+in the window running kafka-console-consumer.sh right after you hit return.
 
 
 ## Mac Specific Notes
@@ -188,7 +188,7 @@ In essence, the Docker server runs on the Windows side under Hyper-V and the Doc
 
 ## Linux Specific Notes
 
-There were no issues running the above command.
+There were no issues running the above commands.
 
 ## TO DO
 
