@@ -13,7 +13,7 @@ RUN yum -y install confluent-community-2.12 \
                    avro-c.x86_64 avro-c-devel.x86_64 avro-c-debuginfo.x86_64 avro-c-tools.x86_64 \
                    avro-cpp.x86_64 avro-cpp-devel.x86_64 avro-cpp-debuginfo.x86_64 \
                    confluent-libserdes.x86_64 confluent-libserdes-devel.x86_64 confluent-libserdes-debuginfo.x86_64.rpm
-RUN yum --disablerepo=* --enablerepo=Confluent.dist --enablerepo=Confluent install librdkafka1.x86_64 librdkafka-devel.x86_64 librdkafka-debuginfo.x86_64         
+RUN yum -y --disablerepo=* --enablerepo=Confluent.dist --enablerepo=Confluent install librdkafka1.x86_64 librdkafka-devel.x86_64 librdkafka-debuginfo.x86_64         
 COPY scripts/runClient /root/runClient
 RUN chmod ugo+rx /root/runClient
 WORKDIR /usr/bin
