@@ -23,9 +23,9 @@ $SIG{'PIPE'}  = \&ignoreSignal;
 $SIG{'ALRM'}  = \&ignoreSignal;
 
 my($zk);
-$zk->{'dir'}    = '/opt/apache-zookeeper';
+$zk->{'dir'}    = '/tmp';
 $zk->{'name'}   = 'zk';
-$zk->{'cmd'}    = '/opt/apache-zookeeper/bin/zkServer.sh start';
+$zk->{'cmd'}    = '/usr/bin/zookeeper-server-start  /etc/kafka/zookeeper.properties';
 $zk->{'starts'} = 0;
 
 my($kafka);
