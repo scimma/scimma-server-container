@@ -8,10 +8,10 @@ The SCIMMA Server Container provides a development version of the SCIMMA server 
 
 ## Prerequisites:
 
-        0. VirtualBox (Mac Only)
-        1. Build tools: GNU Make, curl, git (only if building the containers)
-        2. Working docker installation
-        3. Working docker-compose installation
+  0. VirtualBox (Mac Only)
+  1. Build tools: GNU Make, curl, git (only if building the containers)
+  2. Working docker installation
+  3. Working docker-compose installation
 
 ## Use Cases
 
