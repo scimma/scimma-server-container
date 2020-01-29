@@ -29,7 +29,7 @@ $zk->{'cmd'}    = '/usr/bin/zookeeper-server-start  /etc/kafka/zookeeper.propert
 $zk->{'starts'} = 0;
 
 my($kafka);
-$kafka->{'dir'}    = '/opt/kafka';
+$kafka->{'dir'}    = '/tmp';
 $kafka->{'name'}   = 'kafka';
 $kafka->{'cmd'}    = '/usr/bin/kafka-server-start /etc/kafka/server.properties';
 $kafka->{'starts'} = 0;
