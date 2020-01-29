@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 ###
-### Run the container programs. 
+### Run the container programs.
 ### Handle signals.
 ### Restart container programs that die (after a sleep).
 ###
@@ -51,10 +51,10 @@ printf("IP ADDRESS OF SERVER: %s\n", $ip);
 ##
 while (1) {
     if ($G_Terminate) {
-	for $t (@threads) {
-      	    $t->kill('SIGTERM');
-	}
-	exit(0);
+    for $t (@threads) {
+            $t->kill('SIGTERM');
+    }
+    exit(0);
     }
 }
 
@@ -69,12 +69,12 @@ sub runCommand {
     my($numStarts) = 0;
     my($oLog, $eLog);
     while (1) {
-	$numStarts ++;
-	$oLog = sprintf("/var/log/%s.out.%d", $cObj->{'name'}, $numStarts);
-	$eLog = sprintf("/var/log/%s.err.%d", $cObj->{'name'}, $numStarts);
-	system(sprintf("cd %s && (%s > %s 2> %s) ", $cObj->{'dir'}, $cObj->{'cmd'}, $oLog, $eLog));
-	sleep(5);
-    }   
+    $numStarts ++;
+    $oLog = sprintf("/var/log/%s.out.%d", $cObj->{'name'}, $numStarts);
+    $eLog = sprintf("/var/log/%s.err.%d", $cObj->{'name'}, $numStarts);
+    system(sprintf("cd %s && (%s > %s 2> %s) ", $cObj->{'dir'}, $cObj->{'cmd'}, $oLog, $eLog));
+    sleep(5);
+    }
 }
 
 sub handleTerm {
@@ -93,15 +93,15 @@ sub getIpAddress {
     my($line);
     my($ip) = "UNKNOWN";
     while ($line = shift(@netinfo)) {
-	chomp($line);
-	if ($line =~ /^eth0:\s+/) {
-	    $line = shift(@netinfo);
-	    chomp($line);
-	    if ($line =~ /^\s+inet\s+(\S+)\s+netmask\s+(\S+)\s+broadcast\s+(\S+)\s*$/) {
-		$ip = $1;
-		last;
-	    }
-	}
+    chomp($line);
+    if ($line =~ /^eth0:\s+/) {
+        $line = shift(@netinfo);
+        chomp($line);
+        if ($line =~ /^\s+inet\s+(\S+)\s+netmask\s+(\S+)\s+broadcast\s+(\S+)\s*$/) {
+        $ip = $1;
+        last;
+        }
+    }
     }
     return $ip;
 }
