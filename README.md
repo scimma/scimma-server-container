@@ -17,8 +17,8 @@ The SCIMMA Server Container provides a development version of the SCIMMA server 
 
 Documentation for basic use cases:
 
-    1. [SCIMMA client development](doc/ClientDevelopment.md)
-    2. [Demonstration and manual testing](doc/Demo.md)
+ 1. [SCIMMA client development](doc/ClientDevelopment.md)
+ 2. [Demonstration and manual testing](doc/Demo.md)
 
 The SCIMMA Server Container is most definitely **NOT** an example of 
 best practice kafka infrastructure implementation. These
