@@ -19,5 +19,4 @@ COPY scripts/runServer /root/runServer
 RUN  chmod ugo+rx /root/runServer
 WORKDIR /tmp
 EXPOSE 9092/tcp
-#ENTRYPOINT ["/root/runServer"]
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/root/runServer"]

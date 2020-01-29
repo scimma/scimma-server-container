@@ -31,7 +31,7 @@ $zk->{'starts'} = 0;
 my($kafka);
 $kafka->{'dir'}    = '/opt/kafka';
 $kafka->{'name'}   = 'kafka';
-$kafka->{'cmd'}    = '/opt/kafka/bin/kafka-server-start.sh config/server.properties';
+$kafka->{'cmd'}    = '/usr/bin/kafka-server-start /etc/kafka/server.properties';
 $kafka->{'starts'} = 0;
 
 ##
