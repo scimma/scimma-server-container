@@ -1,7 +1,7 @@
 FROM sl:latest
 RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm net-tools \
                    java-1.8.0-openjdk-headless.x86_64 java-1.8.0-openjdk-headless-debug.x86_64 emacs-nox perl \
-                   perl-Getopt-Long bind-utils
+                   perl-Getopt-Long bind-utils cyrus-sasl
 ###
 ### Install Confluent Packages.
 ### Version (5.4) must match version referenced in confluent.repo
@@ -11,7 +11,9 @@ ADD etc/repos/confluent.repo /etc/yum.repos.d/confluent.repo
 RUN yum makecache
 RUN yum -y install confluent-community-2.12 \
                    avro-c.x86_64 avro-c-devel.x86_64 avro-c-debuginfo.x86_64 avro-c-tools.x86_64 \
-                   avro-cpp.x86_64 avro-cpp-devel.x86_64 avro-cpp-debuginfo.x86_64
+                   avro-cpp.x86_64 avro-cpp-devel.x86_64 avro-cpp-debuginfo.x86_64 \
+                   confluent-libserdes.x86_64 confluent-libserdes-devel.x86_64 confluent-libserdes-debuginfo.x86_64.rpm
+RUN yum --disablerepo=* --enablerepo=Confluent.dist --enablerepo=Confluent librdkafka1.x86_64 librdkafka-devel.x86_64 librdkafka-debuginfo.x86_64         
 COPY scripts/runClient /root/runClient
 RUN chmod ugo+rx /root/runClient
 WORKDIR /usr/bin
