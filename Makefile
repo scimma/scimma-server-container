@@ -13,6 +13,8 @@ CLI_LTST := $(CLI_NAME):latest
 CLI_FILES := etc/repos/confluent.repo scripts/runClient 
 SRV_FILES := etc/repos/confluent.repo etc/zookeeper/zoo.cfg etc/kafka/server.properties scripts/runServer
 
+.PHONY: test
+
 all: client server
 
 print-%  : ; @echo $* = $($*)
@@ -26,6 +28,9 @@ server: Dockerfile.server $(SRV_FILES)
 	@if [ ! -z "$$(git status --porcelain)" ]; then echo "Directory is not clean. Commit your changes."; exit 1; fi
 	docker build -f $< -t $(SRV_IMG) .
 	docker tag $(SRV_IMG) $(SRV_LTST)
+
+test:
+	cd test && ./test.pl $(TAG)
 
 clean:
 	rm -f *~
