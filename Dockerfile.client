@@ -21,4 +21,4 @@ RUN cd /usr/local/src && \
 COPY scripts/runClient /root/runClient
 RUN chmod ugo+rx /root/runClient
 WORKDIR /usr/bin
-ENTRYPOINT ["/bin/bash"]
+CMD ["/bin/bash"]

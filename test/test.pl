@@ -41,7 +41,7 @@ push(@preTests, [\&imageExists, $G_serverImage]);
 
 push(@startTests, [\&containerRunning, $G_testServerName]);
 
-push(@postTests, [\&
+#push(@postTests, [\&
 
 ###
 ### the testing network.
