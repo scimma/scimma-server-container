@@ -5,6 +5,8 @@
 use warnings;
 use strict;
 use Getopt::Long;
+use FileHandle;
+use Digest::MD5;
 
 my($opt_Help);
 my($opt_Debug);
@@ -41,7 +43,8 @@ push(@preTests, [\&imageExists, $G_serverImage]);
 
 push(@startTests, [\&containerRunning, $G_testServerName]);
 
-#push(@postTests, [\&
+push(@postTests, [\&sendStringMessages, "data/stringMessages.txt"]);
+push(@postTests, [\&recvStringMessages, "data/stringMessages.txt"]);
 
 ###
 ### the testing network.
@@ -111,6 +114,7 @@ if (!$startTestSuccess) {
     printf("Stage 1: Success! [%d/%d]\n", $numStartTestsSuccessful, $numStartTests);
 }
 printf("\n");
+sleep(2);
 
 ###
 ### Stage 2: Server container is running.
@@ -119,6 +123,7 @@ printf("Stage 2: Server container is running.\n");
 my($numPostTests) = scalar(@postTests);
 my($numPostTestsSuccessful) = 0;
 my($postTestSuccess) = 1;
+$tCount = 0;
 for $t (@postTests) {
     $tCount++;
     $state = runTest(2, $tCount, $numPostTests, $t);
@@ -127,9 +132,9 @@ for $t (@postTests) {
 }
 
 if (!$postTestSuccess) {
-    fatalError(-4, "Stage 2: Some tests failed. Successful: [%d/%d].", $numPostTestsSuccessful,, $numPostTests);
+    fatalError(-4, "Stage 2: Some tests failed. Successful: [%d/%d].", $numPostTestsSuccessful, $numPostTests);
 } else {
-    printf("Stage 2: Success! [%d/%d]\n", $numPostTestsSuccessful,, $numPostTests);
+    printf("Stage 2: Success! [%d/%d]\n", $numPostTestsSuccessful, $numPostTests);
 }
 printf("\n");
 
@@ -197,6 +202,76 @@ sub imageExists {
     }
 }
 
+sub countLines {
+    my($fname) = shift;
+    my($lcount) = 0;
+    my($fh) = FileHandle->new($fname, "r");
+    my($line);
+    while ($line = <$fh>) {
+        $lcount++;
+    }
+    $fh->close();
+    return $lcount;
+}
+
+sub getLines {
+    my($fname) = shift;
+    my($fh) = FileHandle->new($fname, "r");
+    my(@out);
+    my($line);
+    while ($line = <$fh>) {
+        chomp($line);
+        push(@out, $line);
+    }
+    $fh->close();
+    return @out;
+}
+
+sub sendStringMessages {
+    my($fname) = shift;
+    my($command) = sprintf("cat %s | docker run  -i --network=%s -link=%s %s /usr/local/bin/kafkacat -P -b scimma-test-srv:9092 -t test",
+                           $fname, $G_testNetwork, $G_testServerName, $G_clientImage);
+    $debug && printf("SENDSTRINGMESSAGE COMMAND: %s\n", $command);
+    my($numLines) = countLines($fname);
+    my($name) = sprintf("Send %d lines as messages from file: %s", $numLines, $fname);
+    my(@out) = `$command`;
+    my($ec) = $?;
+    if ($ec == 0) {
+        return (1, $name);
+    } else {
+        return (0, $name);
+    }
+}
+
+sub recvStringMessages {
+    my($fname) = shift;
+    my($numLines) = countLines($fname);
+    my($command) = sprintf("docker run  -i --network=%s -link=%s %s /usr/local/bin/kafkacat -C -b scimma-test-srv:9092 -t test  -o -%d -e 2>/dev/null",
+                           $G_testNetwork, $G_testServerName, $G_clientImage, $numLines);
+    $debug && printf("RECVSTRINGMESSAGE COMMAND: %s\n", $command);
+    my(@recvLines) = `$command`;
+    chomp(@recvLines);
+
+    my(@sentLines) = getLines($fname);
+
+    my($name) = sprintf("Receive %d lines and compare to file: %s", $numLines, $fname);
+    if (scalar(@recvLines) != scalar(@sentLines)) {
+        return(0, $name);
+    }
+    my($badLines) = 0;
+    my($i) = 0;
+    for ($i=0; $i<$numLines; $i++) {
+        if (!($sentLines[$i] eq $recvLines[$i])) {
+            $badLines++;
+        }
+    }
+    if ($badLines == 0) {
+        return (1, $name);
+    } else {
+        return (0, $name);
+    }
+}
+
 sub containerRunning {
     my($containerName) = shift;
     my($command) = sprintf("docker inspect --type=container %s", $containerName);
@@ -223,3 +298,4 @@ sub cleanup {
     }
     $debug && printf(STDERR "FINISHED CLEANUP...\n");
 }
+

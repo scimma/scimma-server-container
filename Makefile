@@ -13,6 +13,8 @@ CLI_LTST := $(CLI_NAME):latest
 CLI_FILES := etc/repos/confluent.repo scripts/runClient 
 SRV_FILES := etc/repos/confluent.repo etc/zookeeper/zoo.cfg etc/kafka/server.properties scripts/runServer
 
+.PHONY: test
+
 all: client server
 
 print-%  : ; @echo $* = $($*)
@@ -28,7 +30,7 @@ server: Dockerfile.server $(SRV_FILES)
 	docker tag $(SRV_IMG) $(SRV_LTST)
 
 test:
-	cd test && ./test.pl
+	cd test && ./test.pl $(TAG)
 
 clean:
 	rm -f *~
