@@ -16,7 +16,7 @@ RUN yum -y install confluent-community-2.12 \
 RUN yum -y --disablerepo=* --enablerepo=Confluent.dist --enablerepo=Confluent install librdkafka1.x86_64 librdkafka-devel.x86_64 librdkafka-debuginfo.x86_64
 RUN yum -y install git gcc make
 RUN cd /usr/local/src && \
-    git checkout https://github.com/edenhill/kafkacat.git && \
+    git clone https://github.com/edenhill/kafkacat.git && \
     cd kafkacat && ./configure --prefix=/usr/local && make && make install
 COPY scripts/runClient /root/runClient
 RUN chmod ugo+rx /root/runClient
