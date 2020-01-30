@@ -45,7 +45,7 @@ Address: 172.19.0.2
 Run:
 
 ``` sh
-        ./kafka-console-producer.sh --broker-list scimma-server:9092 --topic=test
+        ./kafka-console-producer --broker-list scimma-server:9092 --topic=test
 ```
 
 and enter several messages one per line. The content is not important. You may see
@@ -59,7 +59,7 @@ When you are done entering messages, type Ctrl-d.
 Run the command (in the scimma-client container):
 
 ``` sh
-    ./kafka-console-consumer.sh --bootstrap-server scimma-server:9092 --topic=test --from-beginning
+    ./kafka-console-consumer --bootstrap-server scimma-server:9092 --topic=test --from-beginning
 ```
 You should see the messages that you sent.
 

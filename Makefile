@@ -1,24 +1,4 @@
 ##
-## Utilities
-##
-CURL := /usr/bin/curl
-
-##
-## ZOO
-##
-ZOO_VER   := 3.5.6
-ZOO_TGZ   := apache-zookeeper-$(ZOO_VER)-bin.tar.gz
-ZOO_URL   := http://apache.cs.utah.edu/zookeeper/zookeeper-$(ZOO_VER)/$(ZOO_TGZ)
-
-##
-## Kafka
-##
-KAFKA_VER := 2.4.0
-SCALA_VER := 2.12
-KAFKA_TGZ := kafka_$(SCALA_VER)-$(KAFKA_VER).tgz
-KAFKA_URL := http://apache.cs.utah.edu/kafka/$(KAFKA_VER)/$(KAFKA_TGZ)
-
-##
 ## For tagging the container:
 ##
 SRV_NAME := scimma/server
@@ -30,31 +10,24 @@ CLI_IMG  := $(CLI_NAME):$(TAG)
 SRV_LTST := $(SRV_NAME):latest
 CLI_LTST := $(CLI_NAME):latest
 
-DOWNLOADS := $(ZOO_TGZ) $(KAFKA_TGZ)
+CLI_FILES := etc/repos/confluent.repo scripts/runClient 
+SRV_FILES := etc/repos/confluent.repo etc/zookeeper/zoo.cfg etc/kafka/server.properties scripts/runServer
 
 all: client server
 
 print-%  : ; @echo $* = $($*)
 
-downloads:
-	mkdir -p downloads
-
-client: Dockerfile.client downloads/$(KAFKA_TGZ)
+client: Dockerfile.client $(CLI_FILES)
 	@if [ ! -z "$$(git status --porcelain)" ]; then echo "Directory is not clean. Commit your changes."; exit 1; fi
 	docker build -f $< -t $(CLI_IMG) .
 	docker tag $(CLI_IMG) $(CLI_LTST)
 
-server: Dockerfile.server downloads/$(ZOO_TGZ) downloads/$(KAFKA_TGZ)
+server: Dockerfile.server $(SRV_FILES)
 	@if [ ! -z "$$(git status --porcelain)" ]; then echo "Directory is not clean. Commit your changes."; exit 1; fi
 	docker build -f $< -t $(SRV_IMG) .
 	docker tag $(SRV_IMG) $(SRV_LTST)
 
-downloads/$(ZOO_TGZ): downloads
-	$(CURL) -s -o downloads/$(ZOO_TGZ) $(ZOO_URL)
-
-downloads/$(KAFKA_TGZ): downloads
-	$(CURL) -s -o downloads/$(KAFKA_TGZ) $(KAFKA_URL)
-
 clean:
 	rm -f *~
 	rm -f downloads/*
+	rmdir downloads
