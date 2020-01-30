@@ -27,6 +27,9 @@ server: Dockerfile.server $(SRV_FILES)
 	docker build -f $< -t $(SRV_IMG) .
 	docker tag $(SRV_IMG) $(SRV_LTST)
 
+test:
+	cd test && ./test.pl
+
 clean:
 	rm -f *~
 	rm -f downloads/*
