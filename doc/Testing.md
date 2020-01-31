@@ -34,7 +34,7 @@ The ``test.pl`` script runs in stages. During each stage, it runs the tests in a
 Currently, the stages are:
 
 | Stage | List | Description                      |
-|-------|:-----------------:|:-----------------------------------------------------|
+|-------|:------------------|:-----------------------------------------------------|
 | 0     | ``@preTests`` |  Tests to run before the server container is started |
 | 1     | ``@startTests`` | Tests that test whether the server container was started |
 | 2     | ``@postTests``  | Tests to run after the container is started |
