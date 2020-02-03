@@ -26,6 +26,7 @@ if (!defined($pw)) {
 my(@altNames) = getHostnames();
 my($name)     = `hostname`;
 chomp($name);
+push(@altNames, $name);
 
 my($n);
 my(@sanEntries);

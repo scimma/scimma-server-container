@@ -146,7 +146,7 @@ sub writeKafkaProperties {
     my($kinFh)  = FileHandle->new($G_kafkaTemplate, "r");
     my($koutFh) = FileHandle->new($G_kafkaConfig, "w");
     my($line);
-    my($credentials) = sprintf("  username=\"%s\" \\\n", $opt_brokerUser);
+    my($credentials) = sprintf("username=\"%s\" \\\n", $opt_brokerUser);
     $credentials .= sprintf("  password=\"%s\" \\\n", $opt_brokerPass);
     $credentials .= sprintf("  user_%s=\"%s\" \\\n", $opt_brokerUser, $opt_brokerPass);
 
