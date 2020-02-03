@@ -45,6 +45,10 @@ push(@startTests, [\&containerRunning, $G_testServerName]);
 
 push(@postTests, [\&sendStringMessages, "data/stringMessages.txt"]);
 push(@postTests, [\&recvStringMessages, "data/stringMessages.txt"]);
+push(@postTests, [\&sslOnPort, "9092"]);
+push(@postTests, [\&listTopics, "No SSL.", "-F /dev/null ", 1]);
+push(@postTests, [\&listTopics, "SSL + bad password", "-F /dev/null -X ssl.ca.location=/root/shared/tls/cacert.pem -X security.protocol=SASL_SSL -X sasl.mechanism=PLAIN -X sasl.username=test -X sasl.password=foo", 1]);
+push(@postTests, [\&listTopics, "SSL + good password", "-F /dev/null -X ssl.ca.location=/root/shared/tls/cacert.pem -X security.protocol=SASL_SSL -X sasl.mechanism=PLAIN -X sasl.username=test -X sasl.password=test-pass", 0]);
 
 ###
 ### the testing network.
@@ -84,7 +88,7 @@ printf("\n");
 ##
 ## Stage 1: Start the scimma/server container.
 ##
-my($scimmaServerStartCommand) = sprintf("docker run -p 9092:9092 --detach=true --rm=true --network=%s --name=%s %s", $G_testNetwork, $G_testServerName, $G_serverImage);
+my($scimmaServerStartCommand) = sprintf("docker run -p 9092:9092 --detach=true --rm=true -v shared:/root/shared --network=%s --name=%s %s", $G_testNetwork, $G_testServerName, $G_serverImage);
 $debug && printf("SERVER START COMMAND: %s\n", $scimmaServerStartCommand);
 my(@startServerOut) = `$scimmaServerStartCommand`;
 if ($? != 0) {
@@ -114,7 +118,7 @@ if (!$startTestSuccess) {
     printf("Stage 1: Success! [%d/%d]\n", $numStartTestsSuccessful, $numStartTests);
 }
 printf("\n");
-sleep(2);
+sleep(10);
 
 ###
 ### Stage 2: Server container is running.
@@ -229,7 +233,7 @@ sub getLines {
 
 sub sendStringMessages {
     my($fname) = shift;
-    my($command) = sprintf("cat %s | docker run  -i --network=%s -link=%s %s /usr/local/bin/kafkacat -P -b scimma-test-srv:9092 -t test",
+    my($command) = sprintf("cat %s | docker run  -i -v shared:/root/shared --network=%s -link=%s %s /usr/local/bin/kafkacat -P -b scimma-test-srv:9092 -t test",
                            $fname, $G_testNetwork, $G_testServerName, $G_clientImage);
     $debug && printf("SENDSTRINGMESSAGE COMMAND: %s\n", $command);
     my($numLines) = countLines($fname);
@@ -246,7 +250,7 @@ sub sendStringMessages {
 sub recvStringMessages {
     my($fname) = shift;
     my($numLines) = countLines($fname);
-    my($command) = sprintf("docker run  -i --network=%s -link=%s %s /usr/local/bin/kafkacat -C -b scimma-test-srv:9092 -t test  -o -%d -e 2>/dev/null",
+    my($command) = sprintf("docker run  -i -v shared:/root/shared --network=%s -link=%s %s /usr/local/bin/kafkacat -C -b scimma-test-srv:9092 -t test  -o -%d -e 2>/dev/null",
                            $G_testNetwork, $G_testServerName, $G_clientImage, $numLines);
     $debug && printf("RECVSTRINGMESSAGE COMMAND: %s\n", $command);
     my(@recvLines) = `$command`;
@@ -299,3 +303,38 @@ sub cleanup {
     $debug && printf(STDERR "FINISHED CLEANUP...\n");
 }
 
+sub listTopics {
+    my($extraText)    = shift;
+    my($extraArgs)    = shift;
+    my($expectedExit) = shift;
+
+    if (!defined($extraText))    { $extraText = ""; }
+    if (!defined($extraArgs))    { $extraArgs = ""; }
+    if (!defined($expectedExit)) { $expectedExit = 0; }
+
+    my($name)    = sprintf("List topics (%s) expect exit code: %d", $extraText, $expectedExit);
+    my($command) = sprintf("docker run -i -v shared:/root/shared --network=scimma-test scimma/client:latest kafkacat %s -b scimma-test-srv:9092 -L 2>/dev/null ", $extraArgs);
+    `$command`;
+    my($ev) = $? >> 8;
+    if ($ev == $expectedExit) {
+        return (1, $name);
+    } else {
+        return (0, $name);
+    }
+}
+
+sub sslOnPort {
+    my($port) = shift;
+    my($expectedExit) = shift;
+
+    if (!defined($expectedExit)) { $expectedExit = 0; }
+    my($name)    = sprintf("Check for SSL on port %d expect: %d", $port, $expectedExit);
+    my($command) = sprintf("docker run -i -v shared:/root/shared --network=scimma-test scimma/client:latest openssl s_client -no_ign_eof -state -connect scimma-test-srv:%d -CAfile /root/shared/tls/cacert.pem  2>&1  < /dev/null", $port);
+    my(@out) = `$command`;
+    my($ev) = $? >> 8;
+    if ($ev == $expectedExit) {
+        return (1, $name);
+    } else {
+        return (0, $name);
+    }
+}
