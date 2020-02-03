@@ -9,6 +9,7 @@ use strict;
 use threads;
 use threads::shared;
 use Getopt::Long;
+use FileHandle;
 
 my($G_kafkaTemplate)  = '/etc/kafka/server.properties.template';
 my($G_kafkaConfig)    = '/etc/kafka/server.properties';
