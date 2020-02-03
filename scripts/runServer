@@ -155,7 +155,7 @@ sub writeKafkaProperties {
     my(@ucreds) = ();
     for $pair (@pairs) {
         ($u,$p) = split(/:/, $pair);
-        push(@ucreds, "user_%s=%s", $u, $p);
+        push(@ucreds, sprintf("user_%s=%s", $u, $p));
     }
 
     $credentials .= "  " . join(" \\\n  ", @ucreds) . ";\n";
