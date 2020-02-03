@@ -9,6 +9,7 @@ use strict;
 use threads;
 use threads::shared;
 use Getopt::Long;
+use FileHandle;
 
 my($G_kafkaTemplate)  = '/etc/kafka/server.properties.template';
 my($G_kafkaConfig)    = '/etc/kafka/server.properties';
@@ -36,7 +37,7 @@ if (defined($opt_Help)) {
 
 printf("Configuring SSL.\n");
 system("/root/configureSSL.pl $opt_keyPass");
-printf("Writing Kafka server properties file\n");
+printf("Writing Kafka server properties file.\n");
 writeKafkaProperties();
 printf("Writing kafkacat config file.\n");
 writeKafkacatConfig();
@@ -146,20 +147,21 @@ sub writeKafkaProperties {
     my($koutFh) = FileHandle->new($G_kafkaConfig, "w");
     my($line);
     my($credentials) = sprintf("username=\"%s\" \\\n", $opt_brokerUser);
-    $credentials .= sprintf("password=\"%s\" \\\n", $opt_brokerPass);
-    $credentials .= sprintf("user_%s=\"%s\" \\\n", $opt_brokerUser, $opt_brokerPass);
+    $credentials .= sprintf("  password=\"%s\" \\\n", $opt_brokerPass);
+    $credentials .= sprintf("  user_%s=\"%s\" \\\n", $opt_brokerUser, $opt_brokerPass);
 
     my(@pairs) = split(/,/, $opt_users);
     my($pair,$u,$p);
+    my(@ucreds) = ();
     for $pair (@pairs) {
-        ($u, $p) = split(/:/, $pair);
-        $credentials .= sprintf("user_%s=\"%s\" \\\n");
+        ($u,$p) = split(/:/, $pair);
+        push(@ucreds, sprintf("user_%s=\"%s\"", $u, $p));
     }
-    $credentials .= "\n";
 
-    my($keyCertPasswords) = sprintf("ssl.truststore.password=%s\nssl.keystore.password=%s\n,ssl.key.password=%s\n",
+    $credentials .= "  " . join(" \\\n  ", @ucreds) . ";\n";
+
+    my($keyCertPasswords) = sprintf("ssl.truststore.password=%s\nssl.keystore.password=%s\nssl.key.password=%s\n",
                                     $opt_keyPass, $opt_keyPass, $opt_keyPass);
-
 
     while ($line = <$kinFh>) {
         $line =~ s/KAFKA_CREDENTIALS/$credentials/;

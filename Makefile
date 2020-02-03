@@ -35,4 +35,4 @@ test:
 clean:
 	rm -f *~
 	rm -f downloads/*
-	rmdir downloads
+	if [ -d downloads ]; then  rmdir downloads else /bin/true; fi
