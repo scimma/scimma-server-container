@@ -154,7 +154,7 @@ sub writeKafkaProperties {
     my($pair,$u,$p);
     for $pair (@pairs) {
         ($u, $p) = split(/:/, $pair);
-        $credentials .= sprintf("user_%s=\"%s\" \\\n");
+        $credentials .= sprintf("user_%s=\"%s\" \\\n", $u, $p);
     }
     $credentials .= "\n";
 
