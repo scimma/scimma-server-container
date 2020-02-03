@@ -12,13 +12,21 @@
 ###      kafka.server.keystore.jks
 ###      kafka.server.truststore.jks
 ###
-### 
+###
 use strict;
+
+##
+## Password for truststore/keystore
+##
+my($pw) = $ARGV[0];
+if (!defined($pw)) {
+    $pw = '123456';
+}
 
 my(@altNames) = getHostnames();
 my($name)     = `hostname`;
 chomp($name);
-my($pw)       = '123456';
+
 my($n);
 my(@sanEntries);
 for $n (@altNames) {
@@ -27,8 +35,8 @@ for $n (@altNames) {
 my($san) = "san=" . join(",", @sanEntries);
 
 # Create a directory to store our output files.
-`mkdir -p /root/tls`;
-chdir('/root/tls');
+`mkdir -p /root/shared/tls`;
+chdir('/root/shared/tls');
 
 # Generate key.
 system(sprintf("keytool -keystore kafka.server.keystore.jks -alias localhost -validity 365 -genkey -keypass %s -storepass %s -storetype pkcs12 -dname \"cn=%s, ou=scimma-test, o=scimma-test, c=US\" -ext %s >/dev/null 2>/dev/null",
@@ -49,6 +57,9 @@ system("openssl x509 -req -CA ca-cert -CAkey ca-key -in cert-file -out cert-sign
 # Import the signed request and the server key into the server's keystore.
 system("keytool -keystore kafka.server.keystore.jks -alias CARoot    -import -file ca-cert -storepass $pw -noprompt >/dev/null 2>/dev/null");
 system("keytool -keystore kafka.server.keystore.jks -alias localhost -import -file cert-signed -storepass $pw >/dev/null 2>/dev/null");
+
+# Export CA cert
+system("keytool -keystore kafka.client.truststore.jks -exportcert -alias caroot  -storepass $pw | openssl x509 -inform DER > cacert.pem");
 
 exit(0);
 

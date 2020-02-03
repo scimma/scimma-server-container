@@ -1,14 +1,21 @@
+###
+### This is a simple docker-compose file that demonstrates
+### the basic functionality of the scimma-server and scimma-client
+### containers.
+###
 version: "3"
 services:
   scimma-server:
     image: scimma/server:latest
     ports:
       - "9092:9092"
+    volumes:
+      - shared:/root/shared
   scimma-client:
     image: scimma/client:latest
-
-      
-      
-    
-      
-    
+    volumes:
+      - shared:/root/shared
+    depends_on:
+      - scimma-server
+volumes:
+  shared:

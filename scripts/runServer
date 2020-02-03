@@ -8,6 +8,38 @@ use warnings;
 use strict;
 use threads;
 use threads::shared;
+use Getopt::Long;
+
+my($G_kafkaTemplate)  = '/etc/kafka/server.properties.template';
+my($G_kafkaConfig)    = '/etc/kafka/server.properties';
+my($G_kafkacatConfig) = '/root/shared/kafkacat.conf';
+
+###
+### Default users. Note, users and passwords containing commas 
+### are not supported.
+###
+my($opt_Help);
+my($opt_brokerUser) = 'admin';          # for inter-broker authentication
+my($opt_brokerPass) = 'admin-secret';   # for inter-broker authentication
+my($opt_users)      = 'test:test-pass'; # a default user and password
+my($opt_keyPass)    = '123456';         # a default password for Java keystores and truststores
+GetOptions("help"  => \$opt_Help,
+           "keyPass=s"    => \$opt_keyPass,
+           "brokerUser=s" => \$opt_brokerUser,
+           "brokerPass=s" => \$opt_brokerPass,
+           "users=s"      => \$opt_users);
+
+if (defined($opt_Help)) {
+    printUsage();
+    exit(0);
+}
+
+printf("Configuring SSL.\n");
+system("/root/configureSSL.pl $opt_keyPass");
+printf("Writing Kafka server properties file\n");
+writeKafkaProperties();
+printf("Writing kafkacat config file.\n");
+writeKafkacatConfig();
 
 $|++; # autoflush stdout
 
@@ -69,11 +101,11 @@ sub runCommand {
     my($numStarts) = 0;
     my($oLog, $eLog);
     while (1) {
-    $numStarts ++;
-    $oLog = sprintf("/var/log/%s.out.%d", $cObj->{'name'}, $numStarts);
-    $eLog = sprintf("/var/log/%s.err.%d", $cObj->{'name'}, $numStarts);
-    system(sprintf("cd %s && (%s > %s 2> %s) ", $cObj->{'dir'}, $cObj->{'cmd'}, $oLog, $eLog));
-    sleep(5);
+        $numStarts ++;
+        $oLog = sprintf("/var/log/%s.out.%d", $cObj->{'name'}, $numStarts);
+        $eLog = sprintf("/var/log/%s.err.%d", $cObj->{'name'}, $numStarts);
+        system(sprintf("cd %s && (%s > %s 2> %s) ", $cObj->{'dir'}, $cObj->{'cmd'}, $oLog, $eLog));
+        sleep(5);
     }
 }
 
@@ -104,4 +136,68 @@ sub getIpAddress {
     }
     }
     return $ip;
+}
+
+###
+### Write a kafka properties file including credentials.
+###
+sub writeKafkaProperties {
+    my($kinFh)  = FileHandle->new($G_kafkaTemplate, "r");
+    my($koutFh) = FileHandle->new($G_kafkaConfig, "w");
+    my($line);
+    my($credentials) = sprintf("username=\"%s\" \\\n", $opt_brokerUser);
+    $credentials .= sprintf("password=\"%s\" \\\n", $opt_brokerPass);
+    $credentials .= sprintf("user_%s=\"%s\" \\\n", $opt_brokerUser, $opt_brokerPass);
+
+    my(@pairs) = split(/,/, $opt_users);
+    my($pair,$u,$p);
+    for $pair (@pairs) {
+        ($u, $p) = split(/:/, $pair);
+        $credentials .= sprintf("user_%s=\"%s\" \\\n");
+    }
+    $credentials .= "\n";
+
+    my($keyCertPasswords) = sprintf("ssl.truststore.password=%s\nssl.keystore.password=%s\n,ssl.key.password=%s\n",
+                                    $opt_keyPass, $opt_keyPass, $opt_keyPass);
+
+
+    while ($line = <$kinFh>) {
+        $line =~ s/KAFKA_CREDENTIALS/$credentials/;
+        $line =~ s/SSL_KEY_CERT_PASSWORDS/$keyCertPasswords/;
+        print $koutFh $line;
+    }
+    $kinFh->close();
+    $koutFh->close();
+}
+
+###
+### This writes a kafkacat config file to a directory
+### that, when using the demo docker-compose file, is 
+### shared with the client container.
+###
+sub writeKafkacatConfig {
+    my($fh) = FileHandle->new($G_kafkacatConfig, "w");
+
+    my($conf) = "ssl.ca.location=/root/shared/tls/cacert.pem\nsecurity.protocol=SASL_SSL\nsasl.mechanism=PLAIN\n";
+    my(@pairs) = split(/,/, $opt_users);
+    my($pair) = $pairs[0];
+    my($u,$p) = split(/:/, $pair);
+    $conf .= sprintf("sasl.username=%s\n", $u);
+    $conf .= sprintf("sasl.password=%s\n", $p);
+
+    print $fh $conf;
+    $fh->close();
+}
+
+sub printUsage {
+    printf("Usage:\n\n");
+    printf("   runServer [--brokerUser=BUSER] [--brokerPass=BPASS] [--users=USER:PASS,...] [--keyPass=KPASS]\n\n");
+    printf("--brokerUser=BUSER\n");
+    printf("     The user for inter-broker communication. Default: admin\n\n");
+    printf("--brokerPass=BPASS\n");
+    printf("     The password for inter-broker communication. Default: admin-secret\n\n");
+    printf("--users=USER:PASS,...\n");
+    printf("      Additional users and passwords. Default: test:test-pass\n\n");
+    printf("--keyPass=KPASS\n");
+    printf("      The password used for Java keystores and truststores. Default: 123456\n\n");
 }

@@ -17,9 +17,11 @@ RUN yum -y --disablerepo=* --enablerepo=Confluent.dist --enablerepo=Confluent in
 ##
 ##
 COPY etc/zookeeper/zoo.cfg /opt/apache-zookeeper/conf/zookeeper.properties
-COPY etc/kafka/server.properties /etc/kafka/server.properties
+COPY etc/kafka/server.properties /etc/kafka/server.properties.template
 COPY scripts/runServer /root/runServer
-RUN  chmod ugo+rx /root/runServer
+COPY scripts/configureSSL.pl /root/configureSSL.pl
+RUN  chmod ugo+rx /root/runServer /root/configureSSL.pl
+RUN  mkdir -p /root/shared/tls
 WORKDIR /tmp
 EXPOSE 9092/tcp
 ENTRYPOINT ["/root/runServer"]

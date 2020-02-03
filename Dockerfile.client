@@ -20,5 +20,6 @@ RUN cd /usr/local/src && \
     cd kafkacat && ./configure --prefix=/usr/local && make && make install
 COPY scripts/runClient /root/runClient
 RUN chmod ugo+rx /root/runClient
+RUN mkdir -p /root/.config && ln -s /root/shared/kafkacat.conf /root/.config/kafkacat.conf
 WORKDIR /usr/bin
 CMD ["/bin/bash"]
