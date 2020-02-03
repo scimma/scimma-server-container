@@ -39,8 +39,8 @@ my($san) = "san=" . join(",", @sanEntries);
 chdir('/root/shared/tls');
 
 # Generate key.
-echo "SSL KEY NAME: " $name
-echo "SSK KEY SAN:  " $san
+printf("SSL KEY NAME: %s\n", $name);
+printf("SSK KEY SAN:  %s\n" $san);
 system(sprintf("keytool -keystore kafka.server.keystore.jks -alias localhost -validity 365 -genkey -keypass %s -storepass %s -storetype pkcs12 -dname \"cn=%s, ou=scimma-test, o=scimma-test, c=US\" -ext %s >/dev/null 2>/dev/null",
                    $pw, $pw, $name, $san));
 # Create CA
