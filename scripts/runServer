@@ -155,12 +155,12 @@ sub writeKafkaProperties {
     my(@ucreds) = ();
     for $pair (@pairs) {
         ($u,$p) = split(/:/, $pair);
-        push(@ucreds, sprintf("user_%s=%s", $u, $p));
+        push(@ucreds, sprintf("user_%s=\"%s\"", $u, $p));
     }
 
     $credentials .= "  " . join(" \\\n  ", @ucreds) . ";\n";
 
-    my($keyCertPasswords) = sprintf("ssl.truststore.password=%s\nssl.keystore.password=%s\n,ssl.key.password=%s\n",
+    my($keyCertPasswords) = sprintf("ssl.truststore.password=%s\nssl.keystore.password=%s\nssl.key.password=%s\n",
                                     $opt_keyPass, $opt_keyPass, $opt_keyPass);
 
     while ($line = <$kinFh>) {
