@@ -24,6 +24,12 @@ The SCIMMA Server Container is most definitely **NOT** an example of
 best practice kafka infrastructure implementation. These
 containers are not intended for production use.
 
+## Detailed Container Descriptions
+
+ 1. [scimma/server](doc/serverContainer.md)
+ 2. [scimma/client](doc/clientContainer.md)
+
+
 ## DockerHub
 
 The containers are published on https://dockerhub.com:
@@ -70,7 +76,6 @@ and two corresponding tags:
 ```
 
 where TAG is the hash of the latest git commit. 
-
 
 ## OS Specific Notes
 
