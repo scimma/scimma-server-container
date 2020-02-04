@@ -2,7 +2,7 @@
 
 For the packages installed, the best documentation is the [Dockerfile.server file itself](../Dockerfile.server).
 
-## EntryPont
+## EntryPoint
 
 The entrypoint of the scimma/server container is:
 
@@ -21,12 +21,32 @@ which is a Perl script that:
 
 It takes serveral options:
 
+```
+    --brokerUser=BUSER
+    --brokerPass=BPASS
+    --users=USER:PASS,...
+    --keyPass=KPASS
+```
+
+**BUSER** and **BPASS** are the username and password used for inter-broker communication. The defaults are BUSER=_admin_ and BPASS=_admin-secret_.
+
+Additional usernames and password can be specified as comma separated pairs with the elements of the pair separated by colons. The default
+is _test:test-pass_.
+
+**KPASS** is used as the password for Java keystores and truststores and is generally not referenced by clients.
+
+In addition to normal operation, ``runServer`` can be called with ``--help`` to provide a description of the options:
+
+```
+       docker run -it  scimma/server --help
+```
+
 ## SSL Keys and Certificates
 
 The runServer script calls:
 
 ```
-    /root/configure SSL.pl
+    /root/configureSSL.pl
 ```
 
 to configure SSL. This is a very short script that runs a few keytool and openssl commands
@@ -49,10 +69,43 @@ All of these files are written in:
 The main Kafka configuration file is:
 
 ```
-     /etc/kafka/server.properties
+     /etc/kafka/server.properties 
 ```
 
-It contains configuration for the network interfaces and ports to listen on, passwords, and it references the SSL Key and certificate configuration above.
+It contains configuration for the network interfaces and ports to listen on, passwords, and it references the SSL keys and certificates created by ``configureSSL.pl``.
+
+## Kafka SSL/Auth Configuration
+
+The ``server.properties`` file is dynamically generated from a template, but the SSL/Auth relevant configuration
+will be similar to:
+
+```
+##
+## Listen using SSL on port 9092, use SASL for authentication:
+##
+listeners=SASL_SSL://:9092
+
+##
+## Use PLAIN SASL (usernames/passwords):
+##
+sasl.enabled.mechanisms=PLAIN
+
+##
+## Use SSL and SASL authentication for inter-broker communication:
+##
+security.inter.broker.protocol=SASL_SSL
+sasl.mechanism.inter.broker.protocol=PLAIN
+
+##
+## When using PLAIN authentication with SASL, use the follwing usernames/passwords.
+## These are the defaults.
+##
+listener.name.sasl_ssl.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
+  username="admin" \
+  password="admin-secret" \
+  user_admin="admin-secret" \
+  user_test="test-pass";
+```
 
 # Kafkacat config file
 
@@ -62,7 +115,7 @@ The kafkacat config file is written to:
      /root/shared/kafkacat.conf
 ```
 
-The ``kafkacat.conf`` file is not very useful there. However, the scimma/client container 
+The ``kafkacat.conf`` file is not very useful where it sits. However, the scimma/client container 
 has a symbolic link:
 
 ```
@@ -87,6 +140,18 @@ looks like:
   sasl.password=test-pass
 
 ```
+
+When doing [client develpment on the host](ClientDevelopment.md), it might can be convenient to run docker with
+a local directory mapped to ``/root/shared``:
+
+```
+       -v  /my/path:/root/shared
+``
+
+where ``/my/path`` is a directory on the host. The ``cacert.pem`` file would then be available for easy
+reference by kafkacat running on the host.
+
+Another alternative is to copy the ``cacert.pem`` file using ``docker cp``.
 
 ## Running kafka and zookeeper
 

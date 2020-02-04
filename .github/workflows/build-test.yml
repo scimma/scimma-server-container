@@ -9,11 +9,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-18.04
-    name: build
+    name:    build
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: build
-        run: make
-      - name:
-        run: make test
+      - name: make
+        run:  make
+      - name: test
+        run:  make test
