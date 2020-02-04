@@ -68,6 +68,14 @@ $kafka->{'cmd'}    = '/usr/bin/kafka-server-start /etc/kafka/server.properties';
 $kafka->{'starts'} = 0;
 
 ##
+## Remove meta.properties file if it exists. This supports the case of persisting
+## /tmp/kafka-logs using a volume external to the container. The meta.properties
+## file contains the cluster.id which is automatically generated.
+##
+system("if [ -f /tmp/kafka-logs/meta.properties ]; then rm -f /tmp/kafka-logs/meta.properties; fi");
+
+
+##
 ## Create threads.
 ##
 my($t, @threads);
