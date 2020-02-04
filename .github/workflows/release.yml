@@ -1,7 +1,11 @@
 name: Release
 on:
-  release:
-    types: [published, created]
+  push:
+    branches-ignore:
+      - '!master'
+    tags:
+      - 'version-*'
+        
 jobs:
   release:
     runs-on: ubuntu-18.04
