@@ -22,4 +22,8 @@ jobs:
           BUILDER: ${{ secrets.BUILDER }}
         run:  echo "=========== ENV =========="; env; echo "========================"
       - name: pwd
-        run:  echo "pwd: " `pwd`
+        run:  echo "pwd: " 
+      - name: runPwd
+        run: pwd
+      - name: ls
+        run: ls
