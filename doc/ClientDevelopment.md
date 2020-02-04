@@ -36,6 +36,15 @@ The scimma/server container stores a kafkacat configuration file (``kafkacat.con
     -v /local/path/shared:/root/shared
 ```
 
+## Putting it all together
+
+An example command line that persists data to a host directory (``/tmp/kafka-logs``) and stores SSL info and the kafkacat config file under a host directry (``/tmp/shared``) is:
+
+```
+    docker run -p 9092:9092 -v /tmp/kafka-logs:/tmp/kafka-logs -v /tmp/shared:/root/shared  --hostname localhost scimma/server
+```
+
+
 ## Notes:
 
 The hostname of the server is sent to kafka clients and the clients use the hostname to resolve to an IP address *even if* they are already connected to the kafka server (for example, by directly using the localhost IP address). It is, therefore, necessary to set the hostname of the server to a string that the client can resolve.
