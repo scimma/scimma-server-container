@@ -33,11 +33,15 @@ test:
 	cd test && ./test.pl $(TAG)
 
 set-release-tags:
-	$(eval RELEASE_TAG=`echo $(GITHUB_REF) | awk -F- '{print $$$$2}'`)
-	$(eval MAJOR_TAG=`echo $(RELEASE_TAG)  | awk -F. '{print $$$$1}'`)
-	$(eval MINOR_TAG=`echo $(RELEASE_TAG)  | awk -F. '{print $$$$2}'`) 
+	@$(eval RELEASE_TAG := $(shell echo $(GITHUB_REF) | awk -F- '{print $$2}'))
+	@echo RELEASE_TAG =  $(RELEASE_TAG)
+	@$(eval MAJOR_TAG   := $(shell echo $(RELEASE_TAG) | awk -F. '{print $$1}'))
+	@echo MAJOR_TAG = $(MAJOR_TAG)
+	@$(eval MINOR_TAG   := $(shell echo $(RELEASE_TAG) | awk -F. '{print $$2}'))
+	@echo MINOR_TAG = $(MINOR_TAG)
 
 push: set-release-tags
+	@(echo $(RELEASE_TAG) | grep -P '^[0-9]+\.[0-9]+\.[0-9]+$$' > /dev/null ) || (echo Bad release tag: $(RELEASE_TAG) && exit 1)
 	@eval "echo $$BUILDERCRED" | docker login --username $(BUILDER) --password-stdin
 	docker tag $(CLI_IMG) $(CLI_NAME):$(RELEASE_TAG)
 	docker tag $(SRV_IMG) $(SRV_NAME):$(RELEASE_TAG)
