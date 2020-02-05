@@ -38,7 +38,7 @@ my($san) = "san=" . join(",", @sanEntries);
 # Create a directory to store our output files.
 `mkdir -p /root/shared/tls`;
 chdir('/root/shared/tls');
-`cd /root/shared/tls && find . | xargs rm -f`;
+`cd /root/shared/tls && find . -type f | xargs rm -f`;
 
 # Generate key.
 printf("SSL KEY NAME: %s\n", $name);
