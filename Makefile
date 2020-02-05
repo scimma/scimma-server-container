@@ -13,7 +13,7 @@ CLI_LTST := $(CLI_NAME):latest
 CLI_FILES := etc/repos/confluent.repo scripts/runClient 
 SRV_FILES := etc/repos/confluent.repo etc/zookeeper/zoo.cfg etc/kafka/server.properties scripts/runServer
 
-.PHONY: test
+.PHONY: test set-release-tag push clean client server all
 
 all: client server
 
@@ -31,6 +31,16 @@ server: Dockerfile.server $(SRV_FILES)
 
 test:
 	cd test && ./test.pl $(TAG)
+
+set-release-tag:
+	$(eval RELEASE_TAG=`echo $(GITHUB_REF) | awk -F/ '{print $$$$3}'`)
+
+push: set-release-tag
+	@eval "echo $$BUILDERCRED" | docker login --username $(BUILDER) --password-stdin
+	docker tag $(CLI_IMG) $(CLI_NAME):$(RELEASE_TAG)
+	docker tag $(SRV_IMG) $(SRV_NAME):$(RELEASE_TAG)
+	docker push scimma/client:$(RELEASE_TAG)
+	docker push scimma/server:$(RELEASE_TAG)
 
 clean:
 	rm -f *~

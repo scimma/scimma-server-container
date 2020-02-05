@@ -3,7 +3,7 @@ on:
   push:
     tags:
       - 'version-*'
-        
+
 jobs:
   release:
     runs-on: ubuntu-18.04
@@ -15,11 +15,9 @@ jobs:
         run:  make
       - name: test
         run:  make test
-      - name: env
-        env: 
+      - name: push
+        env:
           BUILDER: ${{ secrets.BUILDER }}
-        run:  env
-      - name: ls
-        run: ls
-      - name: pwd
-        run: pwd
+        env:
+          BUILDERCRED: ${{ secrets.BUILDERCRED }}
+        run: make push
