@@ -13,9 +13,9 @@ has an installation of kafka without zookeper. You can run
 in the scimma-client container to verify that the client and server can communicate and that kafka is
 functioning.
 
-## LATEST???
+## Feb 5, 2020
 
-TAG: ???
+Version:  0.1
 
 Container changes:
 
@@ -36,7 +36,7 @@ Container changes:
 
      to send the lines of the file foo.txt as messages and retrieve the last 5 messages.
 
-  6. There is "test" make target. It is basic at the moment, but it does have a non-trivial tests.
+  6. There is "test" make target. It is basic at the moment, but it does have non-trivial tests.
 
   7. Communications between the Kafka broker and clients are encrypted by default and a password is required.
 
@@ -68,6 +68,11 @@ Container changes:
      properties so that the "-X" options are not necessary. It can be downloaded
      like so:
 
+```
         mkdir ~/.config
         docker cp SERVER_CONTAINER_ID:/root/shared/kafkacat.conf ~/.config/kafkacat.conf
+```
+
+  8. The common and stable parts of Dockerfile.client and Dockerfile.server have been
+     factored into a new container: scimma/base.
 

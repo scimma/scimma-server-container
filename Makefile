@@ -13,7 +13,7 @@ CLI_LTST := $(CLI_NAME):latest
 CLI_FILES := etc/repos/confluent.repo scripts/runClient 
 SRV_FILES := etc/repos/confluent.repo etc/zookeeper/zoo.cfg etc/kafka/server.properties scripts/runServer
 
-.PHONY: test set-release-tag push clean client server all
+.PHONY: test set-release-tags push clean client server all
 
 all: client server
 
@@ -32,15 +32,28 @@ server: Dockerfile.server $(SRV_FILES)
 test:
 	cd test && ./test.pl $(TAG)
 
-set-release-tag:
-	$(eval RELEASE_TAG=`echo $(GITHUB_REF) | awk -F/ '{print $$$$3}'`)
+set-release-tags:
+	$(eval RELEASE_TAG=`echo $(GITHUB_REF) | awk -F- '{print $$$$2}'`)
+	$(eval MAJOR_TAG=`echo $(RELEASE_TAG)  | awk -F. '{print $$$$1}'`)
+	$(eval MINOR_TAG=`echo $(RELEASE_TAG)  | awk -F. '{print $$$$2}'`) 
 
-push: set-release-tag
+push: set-release-tags
 	@eval "echo $$BUILDERCRED" | docker login --username $(BUILDER) --password-stdin
 	docker tag $(CLI_IMG) $(CLI_NAME):$(RELEASE_TAG)
 	docker tag $(SRV_IMG) $(SRV_NAME):$(RELEASE_TAG)
+	docker tag $(CLI_IMG) $(CLI_NAME):$(MAJOR_TAG)
+	docker tag $(SRV_IMG) $(SRV_NAME):$(MAJOR_TAG)
+	docker tag $(CLI_IMG) $(CLI_NAME):$(MAJOR_TAG).$(MINOR_TAG)
+	docker tag $(SRV_IMG) $(SRV_NAME):$(MAJOR_TAG).$(MINOR_TAG)
 	docker push scimma/client:$(RELEASE_TAG)
 	docker push scimma/server:$(RELEASE_TAG)
+	docker push scimma/client:$(MAJOR_TAG)
+	docker push scimma/server:$(MAJOR_TAG)
+	docker push scimma/client:$(MAJOR_TAG).$(MINOR_TAG)
+	docker push scimma/server:$(MAJOR_TAG).$(MINOR_TAG)
+	docker push $(CLI_LTST)
+	docker push $(SRV_LTST)
+	rm -f $(HOME)/.docker/config.json
 
 clean:
 	rm -f *~
