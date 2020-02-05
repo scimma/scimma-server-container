@@ -8,7 +8,6 @@ RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.n
 ###
 RUN rpm --import https://packages.confluent.io/rpm/5.4/archive.key
 ADD etc/repos/confluent.repo /etc/yum.repos.d/confluent.repo
-RUN yum makecache
 RUN yum -y install confluent-community-2.12 \
                    avro-c.x86_64 avro-c-devel.x86_64 avro-c-debuginfo.x86_64 avro-c-tools.x86_64 \
                    avro-cpp.x86_64 avro-cpp-devel.x86_64 avro-cpp-debuginfo.x86_64 \
