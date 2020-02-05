@@ -18,6 +18,5 @@ jobs:
       - name: push
         env:
           BUILDER: ${{ secrets.BUILDER }}
-        env:
           BUILDERCRED: ${{ secrets.BUILDERCRED }}
         run: make push
