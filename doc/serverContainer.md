@@ -28,7 +28,7 @@ It takes serveral options:
     --keyPass=KPASS
 ```
 
-**BUSER** and **BPASS** are the username and password used for inter-broker communication. The defaults are BUSER=_admin_ and BPASS=_admin-secret_.
+**BUSER** and **BPASS** are the username and password used for inter-broker communication. The defaults are **BUSER**=_admin_ and **BPASS**=_admin-secret_.
 
 Additional usernames and password can be specified as comma separated pairs with the elements of the pair separated by colons. The default
 is _test:test-pass_.
@@ -107,7 +107,7 @@ listener.name.sasl_ssl.plain.sasl.jaas.config=org.apache.kafka.common.security.p
   user_test="test-pass";
 ```
 
-# Kafkacat config file
+## Kafkacat config file
 
 The kafkacat config file is written to:
 
@@ -146,7 +146,7 @@ a local directory mapped to ``/root/shared``:
 
 ```
        -v  /my/path:/root/shared
-``
+```
 
 where ``/my/path`` is a directory on the host. The ``cacert.pem`` file would then be available for easy
 reference by kafkacat running on the host.

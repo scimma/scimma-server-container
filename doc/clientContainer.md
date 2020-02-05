@@ -20,7 +20,8 @@ It is recommended that the server and client (server first) be started with the 
 
 ```
   -v shared:/root/shared
-``
+```
+
 When the scimma/server container is started with this option, it will create a *named* volume which will be accessible to other containers that use the same option. It will write the file ``/root/shared/kafkacat.conf`` which contains the information that kafkacat needs to connect to the server. It will typically look like:
 
 ```
@@ -31,7 +32,7 @@ sasl.username=test
 sasl.password=test-pass
 ```
 
-Using the configuration file is equivalent to using the following flags on the kafkacat commad line:
+Using the configuration file is equivalent to using the following flags on the kafkacat command line:
 
 ```
    -X ssl.ca.location=/root/shared/tls/cacert.pem -X security.protocol=SASL_SSL -X sasl.mechanism=PLAIN -X sasl.username=test -X sasl.password=test-pass
