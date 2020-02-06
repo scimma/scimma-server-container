@@ -7,15 +7,19 @@ version: "3"
 services:
   scimma-server:
     image: scimma/server:latest
+    hostname: scimma-server
     ports:
       - "9092:9092"
     volumes:
       - shared:/root/shared
   scimma-client:
+    hostname: scimma-client
     image: scimma/client:latest
     volumes:
       - shared:/root/shared
     depends_on:
+      - scimma-server
+    links:
       - scimma-server
 volumes:
   shared:

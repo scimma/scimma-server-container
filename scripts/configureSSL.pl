@@ -14,6 +14,7 @@
 ###
 ###
 use strict;
+use FileHandle;
 
 ##
 ## Password for truststore/keystore
@@ -28,6 +29,17 @@ my($name)     = `hostname`;
 chomp($name);
 push(@altNames, $name);
 
+## For keytool, names must consist of: leters, digits, and hyphens
+my(@tmpNames);
+for $name (@altNames) {
+    if (!($name =~ /^[a-zA-Z0-9\-]+$/)) {
+    printf("Excluding name from SAN: %s\n", $name);
+    next;
+    }
+    push(@tmpNames, $name);
+}
+@altNames = @tmpNames;
+
 my($n);
 my(@sanEntries);
 for $n (@altNames) {
@@ -40,30 +52,37 @@ my($san) = "san=" . join(",", @sanEntries);
 chdir('/root/shared/tls');
 `cd /root/shared/tls && find . -type f | xargs rm -f`;
 
+my($command);
+
+my($sclog) = "/var/log/configureSSL.log";
+my($scfh) = FileHandle->new($sclog, "w");
 # Generate key.
 printf("SSL KEY NAME: %s\n", $name);
 printf("SSK KEY SAN:  %s\n", $san);
-system(sprintf("keytool -keystore kafka.server.keystore.jks -alias localhost -validity 365 -genkey -keypass %s -storepass %s -storetype pkcs12 -dname \"cn=%s, ou=scimma-test, o=scimma-test, c=US\" -ext %s >/dev/null 2>/dev/null",
-                   $pw, $pw, $name, $san));
+runSSLCommand(sprintf("keytool -keystore kafka.server.keystore.jks -alias localhost -validity 365 -genkey -keypass %s -storepass %s -storetype pkcs12 -dname \"cn=%s, ou=scimma-test, o=scimma-test, c=US\" -ext %s 2>&1", $pw, $pw, $name, $san), $scfh);
+
 # Create CA
-system(sprintf("openssl req -new -x509 -keyout ca-key -out ca-cert -days 365 -passout pass:%s -subj \"/C=US/postalCode=00000/ST=Pennsylvania/L=Test/O=Test/OU=Test/CN=test-ca\" >/dev/null 2>/dev/null", $pw));
+runSSLCommand(sprintf("openssl req -new -x509 -keyout ca-key -out ca-cert -days 365 -passout pass:%s -subj \"/C=US/postalCode=00000/ST=Pennsylvania/L=Test/O=Test/OU=Test/CN=test-ca\" 2>&1", $pw), $scfh);
 
 # Import root cert into a server and client truststore.
-system("keytool -keystore kafka.client.truststore.jks -alias CARoot -importcert -file ca-cert -storepass $pw -storetype pkcs12 -noprompt >/dev/null 2>/dev/null");
-system("keytool -keystore kafka.server.truststore.jks -alias CARoot -importcert -file ca-cert -storepass $pw -storetype pkcs12 -noprompt >/dev/null 2>/dev/null");
+runSSLCommand("keytool -keystore kafka.client.truststore.jks -alias CARoot -importcert -file ca-cert -storepass $pw -storetype pkcs12 -noprompt 2>&1", $scfh);
+
+runSSLCommand("keytool -keystore kafka.server.truststore.jks -alias CARoot -importcert -file ca-cert -storepass $pw -storetype pkcs12 -noprompt 2>&1", $scfh);
 
 # Generate a request.
-system("keytool -keystore kafka.server.keystore.jks -alias localhost -certreq -file cert-file -storepass $pw >/dev/null 2>/dev/null");
+runSSLCommand("keytool -keystore kafka.server.keystore.jks -alias localhost -certreq -file cert-file -storepass $pw 2>&1", $scfh);
 
 # Sign the request.
-system("openssl x509 -req -CA ca-cert -CAkey ca-key -in cert-file -out cert-signed -days 365 -CAcreateserial -passin pass:$pw >/dev/null 2>/dev/null");
+runSSLCommand("openssl x509 -req -CA ca-cert -CAkey ca-key -in cert-file -out cert-signed -days 365 -CAcreateserial -passin pass:$pw 2>&1", $scfh);
 
 # Import the signed request and the server key into the server's keystore.
-system("keytool -keystore kafka.server.keystore.jks -alias CARoot    -import -file ca-cert -storepass $pw -noprompt >/dev/null 2>/dev/null");
-system("keytool -keystore kafka.server.keystore.jks -alias localhost -import -file cert-signed -storepass $pw >/dev/null 2>/dev/null");
+runSSLCommand("keytool -keystore kafka.server.keystore.jks -alias CARoot    -import -file ca-cert -storepass $pw -noprompt 2>&1", $scfh);
+runSSLCommand("keytool -keystore kafka.server.keystore.jks -alias localhost -import -file cert-signed -storepass $pw 2>&1", $scfh);
 
 # Export CA cert
-system("keytool -keystore kafka.client.truststore.jks -exportcert -alias caroot  -storepass $pw | openssl x509 -inform DER > cacert.pem");
+runSSLCommand("keytool -keystore kafka.client.truststore.jks -exportcert -alias caroot  -storepass $pw | openssl x509 -inform DER > cacert.pem", $scfh);
+
+$scfh->close();
 
 exit(0);
 
@@ -98,4 +117,14 @@ sub namesForAddress {
     }
     push(@names, $name);
     return @names;
+}
+
+sub runSSLCommand {
+    my($command) = shift;
+    my($fh)      = shift;
+    my($hr) = "==========================================================\n";
+    printf($fh $hr);
+    printf($fh "COMMAND: %s\nOUT:\n", $command);
+    my(@out) = `$command`;
+    print $fh @out;
 }
