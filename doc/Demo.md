@@ -85,3 +85,11 @@ as above in one of the windows and ./kafka-console-consumer.sh as above in the o
 
 When you type a message in the window running kafka-console-producer.sh, you should see the message appear
 in the window running kafka-console-consumer.sh right after you hit return.
+
+## Cleaning up
+
+When you are finished with the containers, you can shut them down with the command:
+
+```
+  docker-compose down
+```
