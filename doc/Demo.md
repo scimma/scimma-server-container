@@ -40,12 +40,12 @@ Address: 172.19.0.2
 
 ```
 
-## Send some test messages:
+## Send some test messages to the topic _test_:
 
 Run:
 
 ``` sh
-        ./kafka-console-producer --broker-list scimma-server:9092 --topic=test
+       kafkacat -P -b scimma-server -t test
 ```
 
 and enter several messages one per line. The content is not important. You may see
@@ -59,9 +59,9 @@ When you are done entering messages, type Ctrl-d.
 Run the command (in the scimma-client container):
 
 ``` sh
-    ./kafka-console-consumer --bootstrap-server scimma-server:9092 --topic=test --from-beginning
+    kafkacat -C -b scimma-server -t test -e
 ```
-You should see the messages that you sent.
+This will receive all of the messages available and exit when the last message on the server is read.
 
 ## Extra credit
 
@@ -80,8 +80,7 @@ to find the container id of the scimma/client container. Then, as root, run:
    docker exec -it CONTAINER_ID /bin/bash
 ```
 
-where CONTAINER_ID is the container id of the scimma/client container. You can now run the ./kafka-console-producer.sh 
-as above in one of the windows and ./kafka-console-consumer.sh as above in the other.
+where CONTAINER_ID is the container id of the scimma/client container. You can now run  ``kafkacat -P ...`` as above in one of the windows and ``_kafkacat -C ...`` as above in the other.
 
 When you type a message in the window running kafka-console-producer.sh, you should see the message appear
 in the window running kafka-console-consumer.sh right after you hit return.
@@ -93,3 +92,4 @@ When you are finished with the containers, you can shut them down with the comma
 ```
   docker-compose down
 ```
+
