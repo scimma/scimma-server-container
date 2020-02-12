@@ -76,3 +76,4 @@ Container changes:
   8. The common and stable parts of Dockerfile.client and Dockerfile.server have been
      factored into a new container: scimma/base.
 
+  9. Modification for workflow demo.
