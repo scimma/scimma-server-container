@@ -1,9 +1,10 @@
-FROM scimma/base:20200204-1
+FROM scimma/base:0.0
 COPY etc/zookeeper/zoo.cfg /opt/apache-zookeeper/conf/zookeeper.properties
 COPY etc/kafka/server.properties /etc/kafka/server.properties.template
 COPY scripts/runServer /root/runServer
 COPY scripts/configureSSL.pl /root/configureSSL.pl
-RUN  chmod ugo+rx /root/runServer /root/configureSSL.pl
+COPY scripts/kafka-run-class.java_debug /usr/bin/kafka-run-class.java_debug
+RUN  chmod ugo+rx /root/runServer /root/configureSSL.pl /usr/bin/kafka-run-class
 RUN  mkdir -p /root/shared/tls
 WORKDIR /tmp
 EXPOSE 9092/tcp
