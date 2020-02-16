@@ -15,6 +15,7 @@
 ###
 use strict;
 use FileHandle;
+use Socket;
 
 ##
 ## Password for truststore/keystore
@@ -113,7 +114,11 @@ sub namesForAddress {
     }
     if (!defined($name)) {
         #Address has no associated DNS name
-        return ();
+        #Try gethostbyaddr
+        $name = gethostbyaddr(inet_aton($addr), AF_INET);
+        if (!defined($name)) {
+            return ();
+        }
     }
     my(@names);
     if ($name =~ /^([^\.]+)\.(.+)$/) {
