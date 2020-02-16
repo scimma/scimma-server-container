@@ -111,6 +111,10 @@ sub namesForAddress {
         }
         last;
     }
+    if (!defined($name)) {
+        #Address has no associated DNS name
+        return ();
+    }
     my(@names);
     if ($name =~ /^([^\.]+)\.(.+)$/) {
         push(@names, $1);
