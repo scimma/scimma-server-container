@@ -26,6 +26,8 @@ It takes serveral options:
     --brokerPass=BPASS
     --users=USER:PASS,...
     --keyPass=KPASS
+    --noSecurity
+    --javaDebugSSL
 ```
 
 **BUSER** and **BPASS** are the username and password used for inter-broker communication. The defaults are **BUSER**=_admin_ and **BPASS**=_admin-secret_.
@@ -34,6 +36,11 @@ Additional usernames and password can be specified as comma separated pairs with
 is _test:test-pass_.
 
 **KPASS** is used as the password for Java keystores and truststores and is generally not referenced by clients.
+
+The ``--noSecurity`` option disables SSL/TLS encryption and username/password authentication.
+
+The ``--javaDebugSSL`` option turns on Java SSL debugging by adding ``-Djavax.net.debug=all`` to the command line. Debugging
+output goes to ``/var/log/kafka.err.RUN_NUM``. Note that this logs quite a bit of data including *all of the plaintext transmitted via SSL* and should not be used in production.
 
 In addition to normal operation, ``runServer`` can be called with ``--help`` to provide a description of the options:
 
