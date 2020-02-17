@@ -55,7 +55,7 @@ if (defined($opt_noSec)) {
 
 if (defined($opt_javaDebugSSL)) {
     printf("Enabling Java SSL debugging.");
-    systemf("cp /usr/bin/kafka-run-class.java_debug /usr/bin/kafka-run-class");
+    system("cp /usr/bin/kafka-run-class.java_debug /usr/bin/kafka-run-class");
 }
 
 $|++; # autoflush stdout
