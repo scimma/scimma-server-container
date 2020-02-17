@@ -1,5 +1,11 @@
 FROM scimma/base:0.0
-RUN yum -y install python3-devel.x86_64 python3-pip.noarch && pip3 install confluent_kafka
+RUN yum -y install python3-devel.x86_64 python3-pip.noarch
+RUN cd /usr/local/src && \
+    git clone https://github.com/confluentinc/confluent-kafka-python.git && \
+    cd confluent-kafka-python && \
+    git checkout v1.3.0 && \
+    python3 setup.py build  && \
+    python3 setup.py install  
 COPY scripts/runClient /root/runClient
 RUN chmod ugo+rx /root/runClient
 RUN mkdir -p /root/.config && ln -s /root/shared/kafkacat.conf /root/.config/kafkacat.conf
