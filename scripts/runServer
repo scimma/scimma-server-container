@@ -11,9 +11,10 @@ use threads::shared;
 use Getopt::Long;
 use FileHandle;
 
-my($G_kafkaTemplate)  = '/etc/kafka/server.properties.template';
-my($G_kafkaConfig)    = '/etc/kafka/server.properties';
-my($G_kafkacatConfig) = '/root/shared/kafkacat.conf';
+my($G_kafkaTemplate)    = '/etc/kafka/server.properties.auth';
+my($G_kafkaTemplateNA)  = '/etc/kafka/server.properties.no_auth';
+my($G_kafkaConfig)      = '/etc/kafka/server.properties';
+my($G_kafkacatConfig)   = '/root/shared/kafkacat.conf';
 
 ###
 ### Default users. Note, users and passwords containing commas 
@@ -24,10 +25,12 @@ my($opt_brokerUser) = 'admin';          # for inter-broker authentication
 my($opt_brokerPass) = 'admin-secret';   # for inter-broker authentication
 my($opt_users)      = 'test:test-pass'; # a default user and password
 my($opt_keyPass)    = '123456';         # a default password for Java keystores and truststores
+my($opt_noSec);                         # if set, disable SSL/Auth
 GetOptions("help"  => \$opt_Help,
            "keyPass=s"    => \$opt_keyPass,
            "brokerUser=s" => \$opt_brokerUser,
            "brokerPass=s" => \$opt_brokerPass,
+           "noSecurity"   => \$opt_noSec,
            "users=s"      => \$opt_users);
 
 if (defined($opt_Help)) {
@@ -37,10 +40,17 @@ if (defined($opt_Help)) {
 
 printf("Configuring SSL.\n");
 system("/root/configureSSL.pl $opt_keyPass");
-printf("Writing Kafka server properties file.\n");
-writeKafkaProperties();
-printf("Writing kafkacat config file.\n");
-writeKafkacatConfig();
+if (defined($opt_noSec)) {
+    printf("Writing Kafka server properties file with NO SSL/Auth.\n");
+    writeKafkaPropertiesNoAuth();
+    printf("Writing empty kafkacat config file.\n");
+    writeKafkacatConfigEmpty();
+} else {
+    printf("Writing Kafka server properties file with SSL/Auth.\n");
+    writeKafkaProperties();
+    printf("Writing kafkacat config file.\n");
+    writeKafkacatConfig();
+}
 
 $|++; # autoflush stdout
 
@@ -148,7 +158,15 @@ sub getIpAddress {
 }
 
 ###
-### Write a kafka properties file including credentials.
+### Write a kafka properties file with no SSL/Auth.
+###
+sub writeKafkaPropertiesNoAuth {
+    my($command) = sprintf("cp %s %s", $G_kafkaTemplateNA, $G_kafkaConfig);
+    system($command);
+}
+
+###
+### Write a kafka properties file including SSL/Auth.
 ###
 sub writeKafkaProperties {
     my($kinFh)  = FileHandle->new($G_kafkaTemplate, "r");
@@ -198,6 +216,14 @@ sub writeKafkacatConfig {
     print $fh $conf;
     $fh->close();
 }
+
+sub writeKafkacatConfigEmpty {
+    my($fh) = FileHandle->new($G_kafkacatConfig, "w");
+    if (defined($fh)) {
+        $fh->close();
+    }
+}
+
 
 sub printUsage {
     printf("Usage:\n\n");
