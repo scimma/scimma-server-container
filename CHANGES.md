@@ -77,3 +77,14 @@ Container changes:
      factored into a new container: scimma/base.
 
   9. Modification for workflow demo.
+
+Version 0.1.6
+
+  1. Switched to scimma/base:0.0 which updates OpenJDK from 8 to 11. 
+
+  2. Modified configureSSL.pl to generate an RSA key instead of a DSA key.
+     This fixes an issue where kafkacat under macOS could not negotiate a cipher suite with the server.
+
+ 
+
+  

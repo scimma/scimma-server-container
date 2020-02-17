@@ -1,4 +1,4 @@
-FROM scimma/base:20200204-1
+FROM scimma/base:0.0
 COPY scripts/runClient /root/runClient
 RUN chmod ugo+rx /root/runClient
 RUN mkdir -p /root/.config && ln -s /root/shared/kafkacat.conf /root/.config/kafkacat.conf

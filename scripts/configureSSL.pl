@@ -15,6 +15,7 @@
 ###
 use strict;
 use FileHandle;
+use Socket;
 
 ##
 ## Password for truststore/keystore
@@ -59,7 +60,7 @@ my($scfh) = FileHandle->new($sclog, "w");
 # Generate key.
 printf("SSL KEY NAME: %s\n", $name);
 printf("SSK KEY SAN:  %s\n", $san);
-runSSLCommand(sprintf("keytool -keystore kafka.server.keystore.jks -alias localhost -validity 365 -genkey -keypass %s -storepass %s -storetype pkcs12 -dname \"cn=%s, ou=scimma-test, o=scimma-test, c=US\" -ext %s 2>&1", $pw, $pw, $name, $san), $scfh);
+runSSLCommand(sprintf("keytool -keystore kafka.server.keystore.jks -alias localhost -validity 365 -genkey -keyalg RSA -keypass %s -storepass %s -storetype pkcs12 -dname \"cn=%s, ou=scimma-test, o=scimma-test, c=US\" -ext %s 2>&1", $pw, $pw, $name, $san), $scfh);
 
 # Create CA
 runSSLCommand(sprintf("openssl req -new -x509 -keyout ca-key -out ca-cert -days 365 -passout pass:%s -subj \"/C=US/postalCode=00000/ST=Pennsylvania/L=Test/O=Test/OU=Test/CN=test-ca\" 2>&1", $pw), $scfh);
@@ -110,6 +111,14 @@ sub namesForAddress {
             $name = $1;
         }
         last;
+    }
+    if (!defined($name)) {
+        #Address has no associated DNS name
+        #Try gethostbyaddr
+        $name = gethostbyaddr(inet_aton($addr), AF_INET);
+        if (!defined($name)) {
+            return ();
+        }
     }
     my(@names);
     if ($name =~ /^([^\.]+)\.(.+)$/) {
