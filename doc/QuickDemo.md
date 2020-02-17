@@ -40,24 +40,24 @@ Start a container using the image ``scimma/server:latest``.
 
 Options:
 
-    | Option |  Description |
-    |--------|:-------------|
-    | *-d*   |  run in the background (detach) |
-    | *--rm=true* | delete the container after it exits |
-    | *--network=scomma-net*  | create an interface on the netowrk ``scimma-net`` |
-    | *--name=scimma-server   | use ``scimma-server`` as the name of the container | 
-    | *-v shared:/root/shared | create a named volumen named ``shared``   |
+| Option |  Description |
+|--------|:-------------|
+| *-d*   |  run in the background (detach) |
+| *--rm=true* | delete the container after it exits |
+| *--network=scimma-net*  | create an interface on the netowrk ``scimma-net`` |
+| *--name=scimma-server*   | use ``scimma-server`` as the name of the container | 
+| *-v shared:/root/shared* | create a named volumen named ``shared``   |
 
 
 ### Client Options
 
 These options are common to the following ``scimma/client`` container commands.
 
-    | Option |  Description |
-    |--------|:-------------|
-    | *-i*   |  run container interactively (in the foreground) |
-    | *--network=scimma-net | create an interface on the netowrk ``scimma-net`` |
-    | *-v shared:/root/shared | mount the named volume ``shared`` as ``/root/shared`` inside the container |
+| Option |  Description |
+|--------|:-------------|
+| *-i*   |  run container interactively (in the foreground) |
+| *--network=scimma-net* | create an interface on the netowrk ``scimma-net`` |
+| *-v shared:/root/shared* | mount the named volume ``shared`` as ``/root/shared`` inside the container |
 
 ### Publish Messages
 
