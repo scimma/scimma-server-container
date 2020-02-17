@@ -18,19 +18,20 @@ my($G_kafkacatConfig)   = '/root/shared/kafkacat.conf';
 
 ###
 ### Default users. Note, users and passwords containing commas 
-### are not supported.
-###
+### are not supported.###
 my($opt_Help);
 my($opt_brokerUser) = 'admin';          # for inter-broker authentication
 my($opt_brokerPass) = 'admin-secret';   # for inter-broker authentication
 my($opt_users)      = 'test:test-pass'; # a default user and password
 my($opt_keyPass)    = '123456';         # a default password for Java keystores and truststores
 my($opt_noSec);                         # if set, disable SSL/Auth
+my($opt_javaDebugSSL);                  # if set, turn on Java SSL debugging in the server.
 GetOptions("help"  => \$opt_Help,
            "keyPass=s"    => \$opt_keyPass,
            "brokerUser=s" => \$opt_brokerUser,
            "brokerPass=s" => \$opt_brokerPass,
            "noSecurity"   => \$opt_noSec,
+           "javaDebugSSL" => \$opt_javaDebugSSL,
            "users=s"      => \$opt_users);
 
 if (defined($opt_Help)) {
@@ -50,6 +51,11 @@ if (defined($opt_noSec)) {
     writeKafkaProperties();
     printf("Writing kafkacat config file.\n");
     writeKafkacatConfig();
+}
+
+if (defined($opt_javaDebugSSL)) {
+    printf("Enabling Java SSL debugging.");
+    systemf("cp /usr/bin/kafka-run-class.java_debug /usr/bin/kafka-run-class");
 }
 
 $|++; # autoflush stdout
