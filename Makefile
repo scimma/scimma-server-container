@@ -11,7 +11,7 @@ SRV_LTST := $(SRV_NAME):latest
 CLI_LTST := $(CLI_NAME):latest
 
 CLI_FILES := etc/repos/confluent.repo scripts/runClient 
-SRV_FILES := etc/repos/confluent.repo etc/zookeeper/zoo.cfg etc/kafka/server.properties scripts/runServer
+SRV_FILES := etc/repos/confluent.repo etc/zookeeper/zoo.cfg etc/kafka/server.properties.auth etc/kafka/server.properties.no_auth scripts/runServer
 
 .PHONY: test set-release-tags push clean client server all
 
