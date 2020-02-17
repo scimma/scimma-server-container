@@ -44,7 +44,7 @@ Options:
 |--------|:-------------|
 | *-d*   |  run in the background (detach) |
 | *--rm=true* | delete the container after it exits |
-| *--network=scomma-net*  | create an interface on the netowrk ``scimma-net`` |
+| *--network=scimma-net*  | create an interface on the netowrk ``scimma-net`` |
 | *--name=scimma-server*   | use ``scimma-server`` as the name of the container | 
 | *-v shared:/root/shared* | create a named volumen named ``shared``   |
 
