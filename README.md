@@ -6,6 +6,15 @@ The SCIMMA Server Container provides a development version of the SCIMMA server 
     2. A Zookeeper installation used by the Kafka server
     3. SCIMMA server processes that consume and produce Kafka messages.
 
+## Quick start (for the impatient)
+
+Spin up a Kafka server listening on `localhost:9092`, with auth and config files accessible in `/tmp/shared`:
+
+```
+docker pull scimma/server:latest
+docker run -p 9092:9092 -it --rm -v /tmp/shared:/root/shared --hostname localhost scimma/server
+```
+
 ## Prerequisites:
 
   0. VirtualBox (Mac Only)
