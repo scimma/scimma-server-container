@@ -1,16 +1,24 @@
-import socket
 import multiprocessing
-import os
+import subprocess
+import socket
 import time
+import re
+import os
+import signal as sig
 
 Terminate = False
 
-def handleTermSig (num)
+def handleTermSig (num, foo):
     print("Recieved SIGTERM. Exiting")
+    global Terminate 
     Terminate = True
 
-def ignoreSig (num)
+def ignoreSig (num, foo):
     print("Recieved signal %d. Ignoring." % num)
+
+def justDieAlready (num, foo):
+    print("Just die already...")
+    os._exit(0)
 
 def getHostnames ():
     cmd   = "ip -4 -o address"
@@ -33,15 +41,28 @@ def namesForAddress (addr):
     nm = re.match(r'^([^\.]+)\.(.+)$', name)
     if nm != None:
         names.append(nm.group(1))
-    return names
+    lines = subprocess.Popen(["nslookup " + addr], shell=True, stdout=subprocess.PIPE).stdout.read().decode().splitlines()    
+    line = lines[0]
+    nm = re.match(r'^\S+\s+name\s+=\s+(\S+)\.', line)
+    if nm != None:
+        name = nm.group(1)
+        names.append(name)
+        nm = re.match(r'^([^\.]+)\.(.+)$', name)
+        if nm != None:
+            names.append(nm.group(1))
+    return list(set(names))
 
 def runCommand (cmd):
+    global Terminate
     numStarts  = 0
+
     while True:
-        numStar = numStar + 1
-        oLog = "/var/log/%s.out.%d" % cmd.name
-        eLog = "/var/log/%s.err.%d" % cmd.name
-        os.system("cd %s && (%s > %s 2 > %s)" % (cmd.wdir, cmd.cmd, oLog, eLog))
+        numStarts = numStarts + 1
+        oLog = "/var/log/%s.out.%d" % (cmd.name, numStarts)
+        eLog = "/var/log/%s.err.%d" % (cmd.name, numStarts)
+        os.system("cd %s && (%s > %s 2> %s)" % (cmd.wdir, cmd.cmd, oLog, eLog))
+        if Terminate:
+            break
         time.sleep(5)
     
 class Command:
@@ -65,7 +86,7 @@ class Config:
     def __init__ (self, jDbg=False, noSec=False, pwd='123456', ul='test:test-pass', bu='admin', \
                   bp='admin-secret'):
         self.jDbg   = jDbg
-        self.noSec  = nosec
+        self.noSec  = noSec
         self.pwd    = pwd
         self.ul     = ul
         self.bu     = bu
@@ -75,7 +96,7 @@ class Config:
        self.writeSSLConfig()
        self.writeKafkacatConfig()
        self.writeKafkaConfig()
-       if self.jDbb:
+       if self.jDbg:
            os.sytem("cp %s %s" % self.krcDbg, self.krc)
 
     def writeSSLConfig(self):
@@ -87,33 +108,33 @@ class Config:
         os.system("mkdir -p " + self.tlsDir)
         os.chdir(self.tlsDir)
         # Generate key.
-        self.runSSLComamnd(("keytool -keystore kafka.server.keystore.jks -alias localhost -validity 365 "
-                      "-genkey -keyalg RSA -keypass %s -storepass %s -storetype pkcs12 -dname "
-                      "cn=%s, ou=scimma-test, o=scimma-test, c=US\" -ext %s 2>&1")
-                      % (self.pwd, self.pwd, name, san)
+        self.runSSLCommand("keytool -keystore kafka.server.keystore.jks -alias localhost -validity 365 "
+                           "-genkey -keyalg RSA -keypass %s -storepass %s -storetype pkcs12 -dname \""
+                           "cn=%s, ou=scimma-test, o=scimma-test, c=US\" -ext san=%s 2>&1"
+                           % (self.pwd, self.pwd, name, san))
         # Create CA
-        self.runSSLCommand(("openssl req -new -x509 -keyout ca-key -out ca-cert -days 365 -passout pass:%s "
-                      "-subj \"/C=US/postalCode=00000/ST=Pennsylvania/L=Test/O=Test/OU=Test/CN=test-ca\" "
-                      "2>&1") % self.pwd)
+        self.runSSLCommand("openssl req -new -x509 -keyout ca-key -out ca-cert -days 365 -passout pass:%s "
+                           "-subj \"/C=US/postalCode=00000/ST=Pennsylvania/L=Test/O=Test/OU=Test/CN=test-ca\" "
+                           "2>&1" % self.pwd)
         # Import root cert into a server and client truststore.
-        self.runSSLCommand(("keytool -keystore kafka.client.truststore.jks -alias CARoot -importcert -file "
-                      "ca-cert -storepass %s -storetype pkcs12 -noprompt 2>&1") % self.pwd)
-        self.runSSLCommand(("keytool -keystore kafka.server.truststore.jks -alias CARoot -importcert -file "
-                      "ca-cert -storepass %s -storetype pkcs12 -noprompt 2>&1") % self.pwd)
+        self.runSSLCommand("keytool -keystore kafka.client.truststore.jks -alias CARoot -importcert -file "
+                           "ca-cert -storepass %s -storetype pkcs12 -noprompt 2>&1" % self.pwd)
+        self.runSSLCommand("keytool -keystore kafka.server.truststore.jks -alias CARoot -importcert -file "
+                           "ca-cert -storepass %s -storetype pkcs12 -noprompt 2>&1" % self.pwd)
         # Generate a request.
-        self.runSSLCommand(("keytool -keystore kafka.server.keystore.jks -alias localhost -certreq -file "
-                      "cert-file -storepass %s 2>&1") % self.pwd)
+        self.runSSLCommand("keytool -keystore kafka.server.keystore.jks -alias localhost -certreq -file "
+                           "cert-file -storepass %s 2>&1" % self.pwd)
         # Sign the request.                      
-        self.runSSLCommand(("openssl x509 -req -CA ca-cert -CAkey ca-key -in cert-file -out cert-signed "
-                      "-days 365 -CAcreateserial -passin pass:%s 2>&1") % self.pwd)
+        self.runSSLCommand("openssl x509 -req -CA ca-cert -CAkey ca-key -in cert-file -out cert-signed "
+                           "-days 365 -CAcreateserial -passin pass:%s 2>&1" % self.pwd)
         # Import the signed request and the server key into the server's keystore.
-        self.runSSLCommand(("keytool -keystore kafka.server.keystore.jks -alias CARoot -import -file "
-                       "ca-cert -storepass %s -noprompt 2>&1") % self.pwd)
-        self.runSSLCommand(("keytool -keystore kafka.server.keystore.jks -alias localhost -import "
-                       "-file cert-signed -storepass %s 2>&1") % sef.passwd)
+        self.runSSLCommand("keytool -keystore kafka.server.keystore.jks -alias CARoot -import -file "
+                           "ca-cert -storepass %s -noprompt 2>&1" % self.pwd)
+        self.runSSLCommand("keytool -keystore kafka.server.keystore.jks -alias localhost -import "
+                           "-file cert-signed -storepass %s 2>&1" % self.pwd)
         # Export CA cert
-        self.runSSLCommand(("keytool -keystore kafka.client.truststore.jks -exportcert -alias caroot "
-                       "-storepass %s | openssl x509 -inform DER > cacert.pem") % self.pwd)
+        self.runSSLCommand("keytool -keystore kafka.client.truststore.jks -exportcert -alias caroot "
+                           "-storepass %s | openssl x509 -inform DER > cacert.pem" % self.pwd)
 
     def runSSLCommand (self, cmd):
         hr = "==========================================================\n";
@@ -125,35 +146,37 @@ class Config:
         f.close()
 
     def writeKafkacatConfig (self):
-        f = open(kcConfig, "w")
+        f = open(self.kcConfig, "w")
         if not self.noSec:
-            f.write(("ssl.ca.location=%s/cacert.pem\nsecurity.protocol=SASL_SSL\n"
-                     "sasl.mechanism=PLAIN\nsasl.username=%s\nsasl.password="
-                     "%s") % tuple([self.tlsDir].extend(self.ul.split(',')[0].split(':')))
+            f.write("ssl.ca.location=%s/cacert.pem\nsecurity.protocol=SASL_SSL\n"
+                    "sasl.mechanism=PLAIN\nsasl.username=%s\nsasl.password="
+                    "%s\n" % tuple([self.tlsDir] + self.ul.split(',')[0].split(':')))
         f.close()
 
     def writeKafkaConfig (self):
-        kcOut  = open(kcConfig, "w")
-        uCreds = "\n".join(map(lambda x: "sasl.username=%s\nsasl.password=%s" % tuple(x.split(':')), 
-                               self.ul))
-        keyCertPasswrods = ("ssl.truststore.password=%s\nssl.keystore.password=%s\nssl.key.password="
+        kcOut  = open(self.kConfig, "w")
+        uCreds =  "username=\"%s\" \\\n password=\"%s\" \\\n" % (self.bu, self.bp) + \
+                  "user_%s=\"%s\" \\\n" % (self.bu, self.bp) + \
+                  " \\\n".join(map(lambda x: "user_%s=\"%s\"" % tuple(x.split(':')), self.ul.split(','))) + \
+                  ";\n"
+        keyCertPasswords = ("ssl.truststore.password=%s\nssl.keystore.password=%s\nssl.key.password="
                             "%s\n") % (self.pwd, self.pwd, self.pwd)
         if self.noSec:
-            kcIn = open(kcTemplateNA, "r")
+            kcIn = open(self.kcTemplateNA, "r")
             while True:
                 line = kcIn.readline()
-                if line == ''
+                if line == '':
                     kcIn.close()
                     break
                 kcOut.write(line)
         else:
-            kcIn = open(kcTemplate, "r")
+            kcIn = open(self.kcTemplate, "r")
             while True:
                 line = kcIn.readline()
-                if line == ''
+                if line == '':
                     kcIn.close()
                     break
-                re.compile('KAFKA_CREDENTIALS').sub(uCreds, line)
-                re.compile('SSL_KEY_CERT_PASSWORDS').sub(keyCertPasswords, line)
+                line = re.sub('(KAFKA_CREDENTIALS)', uCreds, line)
+                line = re.sub('(SSL_KEY_CERT_PASSWORDS)', keyCertPasswords, line)
                 kcOut.write(line)
         kcOut.close()
