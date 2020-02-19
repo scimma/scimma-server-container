@@ -2,11 +2,13 @@ FROM scimma/base:0.0
 COPY etc/zookeeper/zoo.cfg /opt/apache-zookeeper/conf/zookeeper.properties
 COPY etc/kafka/server.properties.auth    /etc/kafka/server.properties.auth
 COPY etc/kafka/server.properties.no_auth /etc/kafka/server.properties.no_auth
-COPY scripts/runServer /root/runServer
-COPY scripts/configureSSL.pl /root/configureSSL.pl
+#COPY scripts/runServer /root/runServer
+#COPY scripts/configureSSL.pl /root/configureSSL.pl
+COPY scripts/runServer.py /root/runServer
 COPY scripts/kafka-run-class.java_debug /usr/bin/kafka-run-class.java_debug
 RUN  chmod ugo+rx /root/runServer /root/configureSSL.pl /usr/bin/kafka-run-class
 RUN  mkdir -p /root/shared/tls
 WORKDIR /tmp
 EXPOSE 9092/tcp
-ENTRYPOINT ["/root/runServer"]
+#ENTRYPOINT ["/root/runServer"]
+ENTRYPOINT ["/bin/bash"]
