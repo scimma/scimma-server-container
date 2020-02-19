@@ -5,6 +5,7 @@ COPY etc/kafka/server.properties.no_auth /etc/kafka/server.properties.no_auth
 #COPY scripts/runServer /root/runServer
 #COPY scripts/configureSSL.pl /root/configureSSL.pl
 COPY scripts/runServer.py /root/runServer
+COPY scripts/KafkaServer.py /root/KafkaServer.py
 COPY scripts/kafka-run-class.java_debug /usr/bin/kafka-run-class.java_debug
 RUN  chmod ugo+rx /root/runServer /usr/bin/kafka-run-class
 RUN  mkdir -p /root/shared/tls
