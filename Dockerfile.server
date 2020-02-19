@@ -6,7 +6,7 @@ COPY etc/kafka/server.properties.no_auth /etc/kafka/server.properties.no_auth
 #COPY scripts/configureSSL.pl /root/configureSSL.pl
 COPY scripts/runServer.py /root/runServer
 COPY scripts/kafka-run-class.java_debug /usr/bin/kafka-run-class.java_debug
-RUN  chmod ugo+rx /root/runServer /root/configureSSL.pl /usr/bin/kafka-run-class
+RUN  chmod ugo+rx /root/runServer /usr/bin/kafka-run-class
 RUN  mkdir -p /root/shared/tls
 WORKDIR /tmp
 EXPOSE 9092/tcp
