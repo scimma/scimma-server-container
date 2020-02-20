@@ -4,6 +4,7 @@ import socket
 import time
 import re
 import os
+import sys
 import signal as sig
 
 def getHostnames ():
@@ -54,16 +55,24 @@ class Command(multiprocessing.Process):
             fe = open("/var/log/%s.err.%d" % (self.name, self.count), "w")
             child = subprocess.Popen([self.cmd] + self.args, cwd=self.wdir, stdout=fo, stderr=fe)
             self.q.put(child.pid, False)
-            child.wait()
+            try:
+                child.wait()
+            except KeyboardInterrupt:
+                break
+            else:
+                print("Command.run %s: child.wait exception." self.name)
             fo.close()
             fe.close()
             time.sleep(5)
+        print("Command.run %s: exiting.")
 
     def JustDieAlready(self):
         self.Terminate = True
         while not self.q.empty():
             pid = self.q.get()
-            os.kill(pid, 15)
+            print("JustDieAlready %s: sending TERM to child: %d" (self.name, pid))
+            os.system("kill -TERM %d >/dev/null 2>/dev/null" % pid)
+        print("JustDieAlready: %s: finished killing children." % self.name)
         self.terminate()
 
 class Config:

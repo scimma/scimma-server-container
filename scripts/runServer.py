@@ -47,7 +47,7 @@ def handleTermSig (num, foo):
      global Terminate
      for c in cms:
           c.JustDieAlready()
-     Teminate = True
+     Terminate = True
 
 sig.signal(sig.SIGTERM, handleTermSig)
 sig.signal(sig.SIGINT,  handleTermSig)
@@ -58,7 +58,10 @@ sig.signal(sig.SIGINT,  handleTermSig)
 while not Terminate:
     time.sleep(1)
 
+print("runServer: Exited main loop.")
 for c in commands:
+     print("runServer joining: %s" % c.name)
      c.join()
 
+print("runServer: Exiting.")
 exit(0)
