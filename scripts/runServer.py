@@ -33,10 +33,12 @@ os.system("if [ -f /tmp/kafka-logs/meta.properties ]; then rm -f /tmp/kafka-logs
 ##
 ## Run kafka and zookeeper processes.
 ##
-cms = [ks.Command('zk','/usr/bin/zookeeper-server-start',['/etc/kafka/zookeeper.properties'],'/tmp'),
-       ks.Command('kafka','/usr/bin/kafka-server-start',['/etc/kafka/server.properties'],'/tmp')]
-for c in cms:
-     c.start()
+cms = [ks.Command('kafka','/usr/bin/kafka-server-start',['/etc/kafka/server.properties'],'/tmp'),
+       ks.Command('zk','/usr/bin/zookeeper-server-start',['/etc/kafka/zookeeper.properties'],'/tmp')]
+
+zk.start()
+sleep(1)
+ks.start()
 
 ##
 ## Set signal handlers.
