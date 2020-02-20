@@ -77,7 +77,7 @@ class Config:
     sslLog       = "/var/log/configureSSL.log"
     tlsDir       = "/root/shared/tls"
 
-    def __init__ (self, jDbg=, noSec, pwd, ul, bu, bp):
+    def __init__ (self, jDbg, noSec, pwd, ul, bu, bp):
         self.jDbg   = jDbg
         self.noSec  = noSec
         self.pwd    = pwd
@@ -102,8 +102,6 @@ class Config:
                'kafka.server.keystore.jks', 'kafka.server.truststore.jks']
         map(lambda x: os.system("if [-f %s ]; then rm -f %s; fi" % (x,x)),
             list(map(lambda x: "%s/%s" % (self.tlsDir, x), efs)))
-        for e in expectedFiles:
-            os.system("" % (e,e))
         os.system("mkdir -p " + self.tlsDir)
         os.chdir(self.tlsDir)
         f = open(self.sslLog, "w")
