@@ -59,7 +59,7 @@ while not Terminate:
     time.sleep(1)
 
 print("runServer: Exited main loop.")
-for c in commands:
+for c in cms:
      print("runServer joining: %s" % c.name)
      c.join()
 

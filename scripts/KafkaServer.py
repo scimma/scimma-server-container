@@ -70,7 +70,7 @@ class Command(multiprocessing.Process):
         self.Terminate = True
         while not self.q.empty():
             pid = self.q.get()
-            print("JustDieAlready %s: sending TERM to child: %d" (self.name, pid))
+            print("JustDieAlready %s: sending TERM to child: %d" % (self.name, pid))
             os.system("kill -TERM %d >/dev/null 2>/dev/null" % pid)
         print("JustDieAlready: %s: finished killing children." % self.name)
         self.terminate()
@@ -109,7 +109,7 @@ class Config:
         print("SSK KEY SAN:  %s" % san)
         efs = ['ca-cert', 'cacert.pem', 'cert-file', 'cert-signed', 'kafka.client.truststore.jks',
                'kafka.server.keystore.jks', 'kafka.server.truststore.jks']
-        map(lambda x: os.system("if [-f %s ]; then rm -f %s; fi" % (x,x)),
+        map(lambda x: os.system("if [ -f %s ]; then rm -f %s; fi" % (x,x)),
             list(map(lambda x: "%s/%s" % (self.tlsDir, x), efs)))
         os.system("mkdir -p " + self.tlsDir)
         os.chdir(self.tlsDir)
