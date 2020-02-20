@@ -60,7 +60,7 @@ class Command(multiprocessing.Process):
             except KeyboardInterrupt:
                 break
             else:
-                print("Command.run %s: child.wait exception." self.name)
+                print("Command.run %s: child.wait exception." % self.name)
             fo.close()
             fe.close()
             time.sleep(5)
