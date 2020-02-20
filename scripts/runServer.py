@@ -30,7 +30,6 @@ parser.add_option("", "--javaDebugSSL", dest="javaDebugSSL", default=False, acti
 config = ks.Config(o.javaDebugSSL, o.noSec, o.keyPass, o.userList, o.brokerUser, o.brokerPass)
 config.write()
 
-
 ##
 ## Remove meta.properties file if it exists. This supports the case of persisting
 ## /tmp/kafka-logs using a volume external to the container. The meta.properties

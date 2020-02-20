@@ -107,6 +107,8 @@ class Config:
         print("SSK KEY SAN:  %s" % san)
         os.system("mkdir -p " + self.tlsDir)
         os.chdir(self.tlsDir)
+        f = open(self.sslLog, "w")
+        f.close()
         # Generate key.
         self.runSSLCommand("keytool -keystore kafka.server.keystore.jks -alias localhost -validity 365 "
                            "-genkey -keyalg RSA -keypass %s -storepass %s -storetype pkcs12 -dname \""
