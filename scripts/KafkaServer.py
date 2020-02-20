@@ -6,34 +6,17 @@ import re
 import os
 import signal as sig
 
-Terminate = False
-
-def handleTermSig (num, foo):
-    print("Recieved SIGTERM. Exiting")
-    global Terminate 
-    Terminate = True
-
-def ignoreSig (num, foo):
-    print("Recieved signal %d. Ignoring." % num)
-
-def justDieAlready (num, foo):
-    print("Just die already...")
-    os._exit(0)
-
 def getHostnames ():
     cmd   = "ip -4 -o address"
-    lines = subprocess.Popen([cmd], shell=True, stdout=subprocess.PIPE).stdout.read().decode().splitlines()
+    lines = subprocess.Popen([cmd], shell=True,
+                             stdout=subprocess.PIPE).stdout.read().decode().splitlines()
     names = []
     for line in lines:
         ipm = re.match(r'\S+\s+\S+\s+inet\s+([0-9\.]+)\/', line)
         if ipm != None:
             names.extend(namesForAddress(ipm.group(1)))
-    retNames = []
-    for name in list(set(names)):
-        um = re.match(r'^([a-zA-Z0-9\-\.]+)$', name)
-        if um != None:
-            retNames.append(name)
-    return retNames
+    return list(filter(lambda x: re.match(r'^([a-zA-Z0-9\-\.]+)$', x) != None, list(set(names))))
+
 
 def namesForAddress (addr):
     name = socket.getfqdn(addr)
@@ -41,7 +24,8 @@ def namesForAddress (addr):
     nm = re.match(r'^([^\.]+)\.(.+)$', name)
     if nm != None:
         names.append(nm.group(1))
-    lines = subprocess.Popen(["nslookup " + addr], shell=True, stdout=subprocess.PIPE).stdout.read().decode().splitlines()    
+    lines = subprocess.Popen(["nslookup " + addr], shell=True,
+                             stdout=subprocess.PIPE).stdout.read().decode().splitlines()    
     line = lines[0]
     nm = re.match(r'^\S+\s+name\s+=\s+(\S+)\.', line)
     if nm != None:
@@ -52,25 +36,35 @@ def namesForAddress (addr):
             names.append(nm.group(1))
     return list(set(names))
 
-def runCommand (cmd):
-    global Terminate
-    numStarts  = 0
-
-    while True:
-        numStarts = numStarts + 1
-        oLog = "/var/log/%s.out.%d" % (cmd.name, numStarts)
-        eLog = "/var/log/%s.err.%d" % (cmd.name, numStarts)
-        os.system("cd %s && (%s > %s 2> %s)" % (cmd.wdir, cmd.cmd, oLog, eLog))
-        if Terminate:
-            break
-        time.sleep(5)
-    
-class Command:
+class Command(multiprocessing.Process):
         
-    def __init__ (self, name, cmd, wdir):
-        self.name = name
-        self.cmd  = cmd
-        self.wdir = wdir
+    def __init__ (self, name, prog, args, wdir):
+        super(Command,self).__init__(name=name)
+        self.q         = multiprocessing.Queue()
+        self.cmd       = prog
+        self.wdir      = wdir
+        self.args      = args
+        self.count     = 0
+        self.Terminate = False
+
+    def run(self):
+        while not self.Terminate:
+            self.count = self.count + 1
+            fo = open("/var/log/%s.out.%d" % (self.name, self.count), "w")
+            fe = open("/var/log/%s.err.%d" % (self.name, self.count), "w")
+            child = subprocess.Popen([self.cmd] + self.args, cwd=self.wdir, stdout=fo, stderr=fe)
+            self.q.put(child.pid, False)
+            child.wait()
+            fo.close()
+            fe.close()
+            time.sleep(5)
+
+    def JustDieAlready(self):
+        self.Terminate = True
+        while not self.q.empty():
+            pid = self.q.get()
+            os.kill(pid, 15)
+        self.terminate()
 
 class Config:
 
@@ -83,8 +77,7 @@ class Config:
     sslLog       = "/var/log/configureSSL.log"
     tlsDir       = "/root/shared/tls"
 
-    def __init__ (self, jDbg=False, noSec=False, pwd='123456', ul='test:test-pass', bu='admin', \
-                  bp='admin-secret'):
+    def __init__ (self, jDbg=, noSec, pwd, ul, bu, bp):
         self.jDbg   = jDbg
         self.noSec  = noSec
         self.pwd    = pwd
@@ -105,6 +98,12 @@ class Config:
         san = ",".join(map(lambda x: "dns:" + x, names))
         print("SSL KEY NAME: %s" % name)
         print("SSK KEY SAN:  %s" % san)
+        efs = ['ca-cert', 'cacert.pem', 'cert-file', 'cert-signed', 'kafka.client.truststore.jks',
+               'kafka.server.keystore.jks', 'kafka.server.truststore.jks']
+        map(lambda x: os.system("if [-f %s ]; then rm -f %s; fi" % (x,x)),
+            list(map(lambda x: "%s/%s" % (self.tlsDir, x), efs)))
+        for e in expectedFiles:
+            os.system("" % (e,e))
         os.system("mkdir -p " + self.tlsDir)
         os.chdir(self.tlsDir)
         f = open(self.sslLog, "w")
@@ -139,10 +138,9 @@ class Config:
                            "-storepass %s | openssl x509 -inform DER > cacert.pem" % self.pwd)
 
     def runSSLCommand (self, cmd):
-        hr = "==========================================================\n";
         f = open(self.sslLog, "a+")
-        f.write(hr)
-        f.write("COMMAND: " + cmd + "\nOUT:\n")
+        f.write("==========================================================\n"
+                "COMMAND: " + cmd + "\nOUT:\n")
         lines = subprocess.Popen([cmd], shell=True, stdout=subprocess.PIPE).stdout.read().decode()
         f.write(lines)
         f.close()

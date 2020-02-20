@@ -1,6 +1,5 @@
 #!/usr/bin/python3
-from optparse        import OptionParser
-from multiprocessing import Process, Value
+from optparse import OptionParser
 import os
 import time
 import signal      as sig
@@ -9,12 +8,6 @@ import KafkaServer as ks
 ##
 ## Parse options.
 ##
-jDbg              = False
-noSec             = False
-password          = '123456'
-userList          = 'test:test-pass'
-brokerUser        = 'admin'
-brokerPassword    = 'admin-secret'
 parser = OptionParser(usage="Usage: %prog [options]")
 parser.add_option("", "--keyPass",      dest="keyPass",      default="123456")
 parser.add_option("", "--brokerUser",   dest="brokerUser",   default="admin")
@@ -36,28 +29,36 @@ config.write()
 ## file contains the cluster.id which is automatically generated.
 ##
 os.system("if [ -f /tmp/kafka-logs/meta.properties ]; then rm -f /tmp/kafka-logs/meta.properties; fi");
-##
-## Set signal handlers.
-##
-#sig.signal(sig.SIGTERM, ks.handleTermSig)
-#sig.signal(sig.SIGINT,  ks.handleTermSig)
 
 ##
 ## Run kafka and zookeeper processes.
 ##
-kc = ks.Command('kafka','/usr/bin/kafka-server-start  /etc/kafka/server.properties',    '/tmp')
-zc = ks.Command('zk','/usr/bin/zookeeper-server-start /etc/kafka/zookeeper.properties', '/tmp')
+cms = [ks.Command('zk','/usr/bin/zookeeper-server-start',['/etc/kafka/zookeeper.properties'],'/tmp'),
+       ks.Command('kafka','/usr/bin/kafka-server-start',['/etc/kafka/server.properties'],'/tmp')]
+for c in cms:
+     c.start()
 
-processes = [Process(target=ks.runCommand, args=(kc,)), Process(target=ks.runCommand, args=(zc,))]
-for p in processes:
-     p.start()
+##
+## Set signal handlers.
+##
+Terminate = False
+def handleTermSig (num, foo):
+     global cms
+     global Terminate
+     for c in cms:
+          c.JustDieAlready()
+     Teminate = True
 
-while True:
+sig.signal(sig.SIGTERM, handleTermSig)
+sig.signal(sig.SIGINT,  handleTermSig)
+
+##
+## Wait for our inevitable death.
+##
+while not Terminate:
     time.sleep(1)
-    if ks.Terminate:
-        print("runServer TERMINATING...: " + repr(ks.Terminate))
-        for p in processes:
-            p.terminate()
-        for p in processes:
-            p.join()
+
+for c in commands:
+     c.join()
+
 exit(0)
