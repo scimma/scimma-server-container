@@ -39,8 +39,10 @@ cms = [ks.Command('kafka','/usr/bin/kafka-server-start',['/etc/kafka/server.prop
        ks.Command('zk','/usr/bin/zookeeper-server-start',['/etc/kafka/zookeeper.properties'],'/tmp')]
 
 cms[1].start()
-sleep(1)
+print("Started zookeeper.")
+time.sleep(1)
 cms[0].start()
+print("Started kafka.")
 
 ##
 ## Set signal handlers.
@@ -55,6 +57,7 @@ def handleTermSig (num, foo):
 
 sig.signal(sig.SIGTERM, handleTermSig)
 sig.signal(sig.SIGINT,  handleTermSig)
+print("Signal handlers installed.")
 
 ##
 ## Wait for our inevitable death.
