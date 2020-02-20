@@ -6,8 +6,6 @@ RUN cd /usr/local/src && \
     git checkout v1.3.0 && \
     python3 setup.py build  && \
     python3 setup.py install  
-COPY scripts/runClient /root/runClient
-RUN chmod ugo+rx /root/runClient
 RUN mkdir -p /root/.config && ln -s /root/shared/kafkacat.conf /root/.config/kafkacat.conf
 WORKDIR /usr/bin
 CMD ["/bin/bash"]
