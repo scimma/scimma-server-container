@@ -163,9 +163,9 @@ class Config:
 
     def writeKafkaConfig (self):
         kcOut  = open(self.kConfig, "w")
-        uCreds =  "username=\"%s\" \\\n password=\"%s\" \\\n" % (self.bu, self.bp) + \
-                  "user_%s=\"%s\" \\\n" % (self.bu, self.bp) + \
-                  " \\\n".join(map(lambda x: "user_%s=\"%s\"" % tuple(x.split(':')), self.ul.split(','))) + \
+        uCreds =  " username=\"%s\" \\\n password=\"%s\" \\\n" % (self.bu, self.bp) + \
+                  " user_%s=\"%s\" \\\n" % (self.bu, self.bp) + \
+                  " \\\n".join(map(lambda x: " user_%s=\"%s\"" % tuple(x.split(':')), self.ul.split(','))) + \
                   ";\n"
         keyCertPasswords = ("ssl.truststore.password=%s\nssl.keystore.password=%s\nssl.key.password="
                             "%s\n") % (self.pwd, self.pwd, self.pwd)
