@@ -18,7 +18,6 @@ def getHostnames ():
             names.extend(namesForAddress(ipm.group(1)))
     return list(filter(lambda x: re.match(r'^([a-zA-Z0-9\-\.]+)$', x) != None, list(set(names))))
 
-
 def namesForAddress (addr):
     name = socket.getfqdn(addr)
     names = [name]
@@ -106,10 +105,12 @@ class Config:
 
     def writeSSLConfig(self):
         names = getHostnames()
-        name = socket.gethostname()
-        san = ",".join(map(lambda x: "dns:" + x, names))
+        name  = socket.gethostname()
+        san   = ",".join(map(lambda x: "dns:" + x, names))
         print("SSL KEY NAME: %s" % name)
         print("SSK KEY SAN:  %s" % san)
+
+        # Remove old SSL configuration files and prepare to run SSL commands.
         efs = ['ca-cert', 'cacert.pem', 'cert-file', 'cert-signed', 'kafka.client.truststore.jks',
                'ca-key', 'ca-cert.srl', 'kafka.server.keystore.jks', 'kafka.server.truststore.jks']
         for ef in efs:
@@ -119,6 +120,7 @@ class Config:
         os.chdir(self.tlsDir)
         f = open(self.sslLog, "w")
         f.close()
+
         # Generate key.
         self.runSSLCommand("keytool -keystore kafka.server.keystore.jks -alias localhost -validity 365 "
                            "-genkey -keyalg RSA -keypass %s -storepass %s -storetype pkcs12 -dname \""

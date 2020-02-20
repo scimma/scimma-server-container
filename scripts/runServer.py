@@ -8,14 +8,17 @@ import KafkaServer as ks
 ##
 ## Parse options.
 ##
-parser = OptionParser(usage="Usage: %prog [options]")
-parser.add_option("", "--keyPass",      dest="keyPass",      default="123456")
-parser.add_option("", "--brokerUser",   dest="brokerUser",   default="admin")
-parser.add_option("", "--brokerPass",   dest="brokerPass",   default="admin-secret")
-parser.add_option("", "--users",        dest="userList",     default="test:test-pass")
-parser.add_option("", "--noSecurity",   dest="noSec",        default=False, action="store_true")
-parser.add_option("", "--javaDebugSSL", dest="javaDebugSSL", default=False, action="store_true") 
-(o, a) = parser.parse_args()
+ulHelp    = "comma separated list of USER:PASS pairs"
+noSecHelp = "disable SSL/auth"
+jdbHelp   = "turn on Java SSL debugging"
+p = OptionParser(usage="Usage: %prog [options]")
+p.add_option("","--keyPass",dest="keyPass",default="123456",help="keystore password")
+p.add_option("","--brokerUser",dest="brokerUser",default="admin",help="broker username")
+p.add_option("","--brokerPass",dest="brokerPass",default="admin-secret",help="broker password")
+p.add_option("","--users",dest="userList",default="test:test-pass",help=ulHelp)
+p.add_option("","--noSecurity",dest="noSec",default=False,action="store_true",help=noSecHelp)
+p.add_option("","--javaDebugSSL",dest="javaDebugSSL",default=False,action="store_true",help=jdbHelp)
+(o, a) = p.parse_args()
 
 ##
 ## Write SSL, kafka, and kafkacat configuration files.
@@ -38,11 +41,14 @@ zCmd = ks.Command('zk','/usr/bin/zookeeper-server-start',['/etc/kafka/zookeeper.
 cms = [kCmd, zCmd]       
 
 zCmd.start()
-while os.system("nc localhost 2181 -w 5 </dev/null") != 0:
+while os.system("nc localhost 2181 -w 5 </dev/null >/dev/null 2>/dev/null") != 0:
      print("Waiting for zookeeper to become active...")
      time.sleep(1)
 print("Started zookeeper.")
 kCmd.start()
+while os.system("nc localhost 9092 -w 5 </dev/null >/dev/null 2>/dev/null") != 0:
+     print("Waiting for kafka to become active...")
+     time.sleep(1)
 print("Started kafka.")
 
 ##
