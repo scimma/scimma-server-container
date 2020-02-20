@@ -60,8 +60,10 @@ class Command(multiprocessing.Process):
             except KeyboardInterrupt:
                 self.Terminate = 1
                 print("Command.run %s: KeyboardInterrupt" % self.name)
+            except:
+                print("Command.run %s: child.wait unexpected exception" % self.name)
             else:
-                print("Command.run %s: child.wait exception." % self.name)
+                print("Command.run %s: child.wait normal exit." % self.name)
             fo.close()
             fe.close()
             time.sleep(5)
@@ -104,14 +106,15 @@ class Config:
 
     def writeSSLConfig(self):
         names = getHostnames()
-        name = names[0]
+        name = socket.gethostname()
         san = ",".join(map(lambda x: "dns:" + x, names))
         print("SSL KEY NAME: %s" % name)
         print("SSK KEY SAN:  %s" % san)
         efs = ['ca-cert', 'cacert.pem', 'cert-file', 'cert-signed', 'kafka.client.truststore.jks',
-               'kafka.server.keystore.jks', 'kafka.server.truststore.jks']
-        map(lambda x: os.system("if [ -f %s ]; then rm -f %s; fi" % (x,x)),
-            list(map(lambda x: "%s/%s" % (self.tlsDir, x), efs)))
+               'ca-key', 'ca-cert.srl', 'kafka.server.keystore.jks', 'kafka.server.truststore.jks']
+        for ef in efs:
+            efp = "%s/%s" % (self.tlsDir, ef)
+            os.system("if [ -f %s ]; then rm -f %s; fi" % (efp, efp))
         os.system("mkdir -p " + self.tlsDir)
         os.chdir(self.tlsDir)
         f = open(self.sslLog, "w")
@@ -119,7 +122,7 @@ class Config:
         # Generate key.
         self.runSSLCommand("keytool -keystore kafka.server.keystore.jks -alias localhost -validity 365 "
                            "-genkey -keyalg RSA -keypass %s -storepass %s -storetype pkcs12 -dname \""
-                           "cn=%s, ou=scimma-test, o=scimma-test, c=US\" -ext san=%s 2>&1"
+                           "cn=%s, ou=scimma-test, o=scimma-test, c=US\" -ext \"san=%s\" 2>&1"
                            % (self.pwd, self.pwd, name, san))
         # Create CA
         self.runSSLCommand("openssl req -new -x509 -keyout ca-key -out ca-cert -days 365 -passout pass:%s "
@@ -142,7 +145,7 @@ class Config:
         self.runSSLCommand("keytool -keystore kafka.server.keystore.jks -alias localhost -import "
                            "-file cert-signed -storepass %s 2>&1" % self.pwd)
         # Export CA cert
-        self.runSSLCommand("keytool -keystore kafka.client.truststore.jks -exportcert -alias caroot "
+        self.runSSLCommand("keytool -keystore kafka.client.truststore.jks -exportcert -alias CARoot "
                            "-storepass %s | openssl x509 -inform DER > cacert.pem" % self.pwd)
 
     def runSSLCommand (self, cmd):

@@ -33,15 +33,16 @@ os.system("if [ -f /tmp/kafka-logs/meta.properties ]; then rm -f /tmp/kafka-logs
 ##
 ## Run kafka and zookeeper processes.
 ##
+kCmd = ks.Command('kafka','/usr/bin/kafka-server-start',['/etc/kafka/server.properties'],'/tmp')
+zCmd = ks.Command('zk','/usr/bin/zookeeper-server-start',['/etc/kafka/zookeeper.properties'],'/tmp')
+cms = [kCmd, zCmd]       
 
-
-cms = [ks.Command('kafka','/usr/bin/kafka-server-start',['/etc/kafka/server.properties'],'/tmp'),
-       ks.Command('zk','/usr/bin/zookeeper-server-start',['/etc/kafka/zookeeper.properties'],'/tmp')]
-
-cms[1].start()
+zCmd.start()
+while os.system("nc localhost 2181 -w 5 </dev/null") != 0:
+     print("Waiting for zookeeper to become active...")
+     time.sleep(1)
 print("Started zookeeper.")
-time.sleep(1)
-cms[0].start()
+kCmd.start()
 print("Started kafka.")
 
 ##
