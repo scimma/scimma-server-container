@@ -58,13 +58,14 @@ class Command(multiprocessing.Process):
             try:
                 child.wait()
             except KeyboardInterrupt:
-                break
+                self.Terminate = 1
+                print("Command.run %s: KeyboardInterrupt" % self.name)
             else:
                 print("Command.run %s: child.wait exception." % self.name)
             fo.close()
             fe.close()
             time.sleep(5)
-        print("Command.run %s: exiting.")
+        print("Command.run %s: exiting." % self.name)
 
     def JustDieAlready(self):
         self.Terminate = True
