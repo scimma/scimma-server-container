@@ -1,245 +1,81 @@
-#!/usr/bin/perl
-###
-### Run the container programs.
-### Handle signals.
-### Restart container programs that die (after a sleep).
-###
-use warnings;
-use strict;
-use threads;
-use threads::shared;
-use Getopt::Long;
-use FileHandle;
+#!/usr/bin/python3
+from optparse import OptionParser
+import os
+import time
+import signal      as sig
+import KafkaServer as ks
 
-my($G_kafkaTemplate)    = '/etc/kafka/server.properties.auth';
-my($G_kafkaTemplateNA)  = '/etc/kafka/server.properties.no_auth';
-my($G_kafkaConfig)      = '/etc/kafka/server.properties';
-my($G_kafkacatConfig)   = '/root/shared/kafkacat.conf';
+##
+## Parse options.
+##
+ulHelp    = "comma separated list of USER:PASS pairs"
+noSecHelp = "disable SSL/auth"
+jdbHelp   = "turn on Java SSL debugging"
+p = OptionParser(usage="Usage: %prog [options]")
+p.add_option("","--keyPass",dest="keyPass",default="123456",help="keystore password")
+p.add_option("","--brokerUser",dest="brokerUser",default="admin",help="broker username")
+p.add_option("","--brokerPass",dest="brokerPass",default="admin-secret",help="broker password")
+p.add_option("","--users",dest="userList",default="test:test-pass",help=ulHelp)
+p.add_option("","--noSecurity",dest="noSec",default=False,action="store_true",help=noSecHelp)
+p.add_option("","--javaDebugSSL",dest="javaDebugSSL",default=False,action="store_true",help=jdbHelp)
+(o, a) = p.parse_args()
 
-###
-### Default users. Note, users and passwords containing commas 
-### are not supported.###
-my($opt_Help);
-my($opt_brokerUser) = 'admin';          # for inter-broker authentication
-my($opt_brokerPass) = 'admin-secret';   # for inter-broker authentication
-my($opt_users)      = 'test:test-pass'; # a default user and password
-my($opt_keyPass)    = '123456';         # a default password for Java keystores and truststores
-my($opt_noSec);                         # if set, disable SSL/Auth
-my($opt_javaDebugSSL);                  # if set, turn on Java SSL debugging in the server.
-GetOptions("help"  => \$opt_Help,
-           "keyPass=s"    => \$opt_keyPass,
-           "brokerUser=s" => \$opt_brokerUser,
-           "brokerPass=s" => \$opt_brokerPass,
-           "noSecurity"   => \$opt_noSec,
-           "javaDebugSSL" => \$opt_javaDebugSSL,
-           "users=s"      => \$opt_users);
-
-if (defined($opt_Help)) {
-    printUsage();
-    exit(0);
-}
-
-printf("Configuring SSL.\n");
-system("/root/configureSSL.pl $opt_keyPass");
-if (defined($opt_noSec)) {
-    printf("Writing Kafka server properties file with NO SSL/Auth.\n");
-    writeKafkaPropertiesNoAuth();
-    printf("Writing empty kafkacat config file.\n");
-    writeKafkacatConfigEmpty();
-} else {
-    printf("Writing Kafka server properties file with SSL/Auth.\n");
-    writeKafkaProperties();
-    printf("Writing kafkacat config file.\n");
-    writeKafkacatConfig();
-}
-
-if (defined($opt_javaDebugSSL)) {
-    printf("Enabling Java SSL debugging.");
-    system("cp /usr/bin/kafka-run-class.java_debug /usr/bin/kafka-run-class");
-}
-
-$|++; # autoflush stdout
-
-my($G_Terminate) = 0;
-$SIG{'TERM'}  = \&handleTerm;
-$SIG{'INT'}   = \&handleTerm;
-$SIG{'HUP'}   = \&ignoreSignal;
-$SIG{'SEGV'}  = \&ignoreSignal;
-$SIG{'ABRT'}  = \&ignoreSignal;
-$SIG{'BUS'}   = \&ignoreSignal;
-$SIG{'FPE'}   = \&ignoreSignal;
-$SIG{'PIPE'}  = \&ignoreSignal;
-$SIG{'ALRM'}  = \&ignoreSignal;
-
-my($zk);
-$zk->{'dir'}    = '/tmp';
-$zk->{'name'}   = 'zk';
-$zk->{'cmd'}    = '/usr/bin/zookeeper-server-start  /etc/kafka/zookeeper.properties';
-$zk->{'starts'} = 0;
-
-my($kafka);
-$kafka->{'dir'}    = '/tmp';
-$kafka->{'name'}   = 'kafka';
-$kafka->{'cmd'}    = '/usr/bin/kafka-server-start /etc/kafka/server.properties';
-$kafka->{'starts'} = 0;
+##
+## Write SSL, kafka, and kafkacat configuration files.
+##
+config = ks.Config(o.javaDebugSSL, o.noSec, o.keyPass, o.userList, o.brokerUser, o.brokerPass)
+config.write()
 
 ##
 ## Remove meta.properties file if it exists. This supports the case of persisting
 ## /tmp/kafka-logs using a volume external to the container. The meta.properties
 ## file contains the cluster.id which is automatically generated.
 ##
-system("if [ -f /tmp/kafka-logs/meta.properties ]; then rm -f /tmp/kafka-logs/meta.properties; fi");
-
-
-##
-## Create threads.
-##
-my($t, @threads);
-push(@threads, threads->create(\&runCommand, $zk));
-push(@threads, threads->create(\&runCommand, $kafka));
-
-my($ip) = getIpAddress();
-printf("IP ADDRESS OF SERVER: %s\n", $ip);
+os.system("if [ -f /tmp/kafka-logs/meta.properties ]; then rm -f /tmp/kafka-logs/meta.properties; fi");
 
 ##
-## Monitor threads.
+## Run kafka and zookeeper processes.
 ##
-## TODO: maybe check thread state and restart threads that have died.
+kCmd = ks.Command('kafka','/usr/bin/kafka-server-start',['/etc/kafka/server.properties'],'/tmp')
+zCmd = ks.Command('zk','/usr/bin/zookeeper-server-start',['/etc/kafka/zookeeper.properties'],'/tmp')
+cms = [kCmd, zCmd]       
+
+zCmd.start()
+while os.system("nc localhost 2181 -w 5 </dev/null >/dev/null 2>/dev/null") != 0:
+     print("Waiting for zookeeper to become active...")
+     time.sleep(1)
+print("Started zookeeper.")
+kCmd.start()
+while os.system("nc localhost 9092 -w 5 </dev/null >/dev/null 2>/dev/null") != 0:
+     print("Waiting for kafka to become active...")
+     time.sleep(1)
+print("Started kafka.")
+
 ##
-while (1) {
-    if ($G_Terminate) {
-    for $t (@threads) {
-            $t->kill('SIGTERM');
-    }
-    exit(0);
-    }
-}
+## Set signal handlers.
+##
+Terminate = False
+def handleTermSig (num, foo):
+     global cms
+     global Terminate
+     for c in cms:
+          c.JustDieAlready()
+     Terminate = True
 
-printf("Exiting outside of monitor loop. This should never happen.");
-exit(-1);
+sig.signal(sig.SIGTERM, handleTermSig)
+sig.signal(sig.SIGINT,  handleTermSig)
+print("Signal handlers installed.")
 
-###
-### Not reached.
-###
-sub runCommand {
-    my($cObj) = shift;
-    my($numStarts) = 0;
-    my($oLog, $eLog);
-    while (1) {
-        $numStarts ++;
-        $oLog = sprintf("/var/log/%s.out.%d", $cObj->{'name'}, $numStarts);
-        $eLog = sprintf("/var/log/%s.err.%d", $cObj->{'name'}, $numStarts);
-        system(sprintf("cd %s && (%s > %s 2> %s) ", $cObj->{'dir'}, $cObj->{'cmd'}, $oLog, $eLog));
-        sleep(5);
-    }
-}
+##
+## Wait for our inevitable death.
+##
+while not Terminate:
+    time.sleep(1)
 
-sub handleTerm {
-    printf("Received SIGTERM, exiting.\n");
-    $G_Terminate = 1;
-}
+print("runServer: Exited main loop.")
+for c in cms:
+     print("runServer joining: %s" % c.name)
+     c.join()
 
-sub ignoreSignal {
-    my($signal) = shift;
-    printf("Received signal: %s -- ignoring...\n", $signal);
-    printf("To kill: docker kill --signal=SIGTERM CONTAINER_ID\n\n");
-}
-
-sub getIpAddress {
-    my(@netinfo) = `/sbin/ifconfig`;
-    my($line);
-    my($ip) = "UNKNOWN";
-    while ($line = shift(@netinfo)) {
-    chomp($line);
-    if ($line =~ /^eth0:\s+/) {
-        $line = shift(@netinfo);
-        chomp($line);
-        if ($line =~ /^\s+inet\s+(\S+)\s+netmask\s+(\S+)\s+broadcast\s+(\S+)\s*$/) {
-        $ip = $1;
-        last;
-        }
-    }
-    }
-    return $ip;
-}
-
-###
-### Write a kafka properties file with no SSL/Auth.
-###
-sub writeKafkaPropertiesNoAuth {
-    my($command) = sprintf("cp %s %s", $G_kafkaTemplateNA, $G_kafkaConfig);
-    system($command);
-}
-
-###
-### Write a kafka properties file including SSL/Auth.
-###
-sub writeKafkaProperties {
-    my($kinFh)  = FileHandle->new($G_kafkaTemplate, "r");
-    my($koutFh) = FileHandle->new($G_kafkaConfig, "w");
-    my($line);
-    my($credentials) = sprintf("username=\"%s\" \\\n", $opt_brokerUser);
-    $credentials .= sprintf("  password=\"%s\" \\\n", $opt_brokerPass);
-    $credentials .= sprintf("  user_%s=\"%s\" \\\n", $opt_brokerUser, $opt_brokerPass);
-
-    my(@pairs) = split(/,/, $opt_users);
-    my($pair,$u,$p);
-    my(@ucreds) = ();
-    for $pair (@pairs) {
-        ($u,$p) = split(/:/, $pair);
-        push(@ucreds, sprintf("user_%s=\"%s\"", $u, $p));
-    }
-
-    $credentials .= "  " . join(" \\\n  ", @ucreds) . ";\n";
-
-    my($keyCertPasswords) = sprintf("ssl.truststore.password=%s\nssl.keystore.password=%s\nssl.key.password=%s\n",
-                                    $opt_keyPass, $opt_keyPass, $opt_keyPass);
-
-    while ($line = <$kinFh>) {
-        $line =~ s/KAFKA_CREDENTIALS/$credentials/;
-        $line =~ s/SSL_KEY_CERT_PASSWORDS/$keyCertPasswords/;
-        print $koutFh $line;
-    }
-    $kinFh->close();
-    $koutFh->close();
-}
-
-###
-### This writes a kafkacat config file to a directory
-### that, when using the demo docker-compose file, is 
-### shared with the client container.
-###
-sub writeKafkacatConfig {
-    my($fh) = FileHandle->new($G_kafkacatConfig, "w");
-
-    my($conf) = "ssl.ca.location=/root/shared/tls/cacert.pem\nsecurity.protocol=SASL_SSL\nsasl.mechanism=PLAIN\n";
-    my(@pairs) = split(/,/, $opt_users);
-    my($pair) = $pairs[0];
-    my($u,$p) = split(/:/, $pair);
-    $conf .= sprintf("sasl.username=%s\n", $u);
-    $conf .= sprintf("sasl.password=%s\n", $p);
-
-    print $fh $conf;
-    $fh->close();
-}
-
-sub writeKafkacatConfigEmpty {
-    my($fh) = FileHandle->new($G_kafkacatConfig, "w");
-    if (defined($fh)) {
-        $fh->close();
-    }
-}
-
-
-sub printUsage {
-    printf("Usage:\n\n");
-    printf("   runServer [--brokerUser=BUSER] [--brokerPass=BPASS] [--users=USER:PASS,...] [--keyPass=KPASS]\n\n");
-    printf("--brokerUser=BUSER\n");
-    printf("     The user for inter-broker communication. Default: admin\n\n");
-    printf("--brokerPass=BPASS\n");
-    printf("     The password for inter-broker communication. Default: admin-secret\n\n");
-    printf("--users=USER:PASS,...\n");
-    printf("      Additional users and passwords. Default: test:test-pass\n\n");
-    printf("--keyPass=KPASS\n");
-    printf("      The password used for Java keystores and truststores. Default: 123456\n\n");
-}
+print("runServer: Exiting.")
+exit(0)
