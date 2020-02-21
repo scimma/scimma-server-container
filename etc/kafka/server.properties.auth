@@ -18,7 +18,7 @@ security.inter.broker.protocol=SASL_SSL
 sasl.mechanism.inter.broker.protocol=PLAIN
 
 listener.name.sasl_ssl.plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
-  KAFKA_CREDENTIALS
+KAFKA_CREDENTIALS
   
 ###
 ### SSL
