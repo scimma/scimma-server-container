@@ -1,5 +1,4 @@
-FROM scimma/base:0.0
-RUN yum -y install python3-devel.x86_64 python3-pip.noarch
+FROM scimma/base:0.1.1
 COPY etc/zookeeper/zoo.cfg /opt/apache-zookeeper/conf/zookeeper.properties
 COPY etc/kafka/server.properties.auth    /etc/kafka/server.properties.auth
 COPY etc/kafka/server.properties.no_auth /etc/kafka/server.properties.no_auth

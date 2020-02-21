@@ -1,23 +1,33 @@
 # SCIMMA Server Container Changes
 
-## Jan 23, 2020
+## Feb 21, 2020
 
-TAG: 20200123-001
+Version 0.1.7
 
-Initial development. The scimma-server container merely runs kafka. The client
-has an installation of kafka without zookeper. You can run 
+  1. Replaced runServer/configureSSL.pl with a Python equivalent.
 
-    * kafka-console-producer.sh
-    * kafka-console-consumer.sh
+  2. Added --noSecurity option to start the Kafka server without
+     SSL and user authentication
 
-in the scimma-client container to verify that the client and server can communicate and that kafka is
-functioning.
+  3. Added --javaDebugSSL option to start the Kafka server with
+     JAVA SSL debugging turned on.
+
+  4. Modified Dockerfiles so that they depend on a specific
+     scimma/base version. For now, that version is 0.1.1
+
+
+## Feb 16, 2020
+
+Version 0.1.6
+
+  1. Switched to scimma/base:0.0 which updates OpenJDK from 8 to 11. 
+
+  2. Modified configureSSL.pl to generate an RSA key instead of a DSA key.
+     This fixes an issue where kafkacat under macOS could not negotiate a cipher suite with the server.
 
 ## Feb 5, 2020
 
-Version:  0.1
-
-Container changes:
+Version:  0.1.5
 
   1. The containers now use Confluent RPMs instead of tar files.
   2. Due to 1, the demo changed slightly. There is no longer a 
@@ -78,13 +88,15 @@ Container changes:
 
   9. Modification for workflow demo.
 
-Version 0.1.6
+## Jan 23, 2020
 
-  1. Switched to scimma/base:0.0 which updates OpenJDK from 8 to 11. 
+TAG: 20200123-001
 
-  2. Modified configureSSL.pl to generate an RSA key instead of a DSA key.
-     This fixes an issue where kafkacat under macOS could not negotiate a cipher suite with the server.
+Initial development. The scimma-server container merely runs kafka. The client
+has an installation of kafka without zookeper. You can run 
 
- 
+    * kafka-console-producer.sh
+    * kafka-console-consumer.sh
 
-  
+in the scimma-client container to verify that the client and server can communicate and that kafka is
+functioning.

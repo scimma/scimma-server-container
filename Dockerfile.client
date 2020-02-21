@@ -1,5 +1,4 @@
-FROM scimma/base:0.0
-RUN yum -y install python3-devel.x86_64 python3-pip.noarch
+FROM scimma/base:0.1.1
 RUN cd /usr/local/src && \
     git clone https://github.com/confluentinc/confluent-kafka-python.git && \
     cd confluent-kafka-python && \
