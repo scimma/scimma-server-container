@@ -101,7 +101,7 @@ class Config:
        self.writeKafkacatConfig()
        self.writeKafkaConfig()
        if self.jDbg:
-           os.sytem("cp %s %s" % self.krcDbg, self.krc)
+           os.sytem("cp %s %s" % (self.krcDbg, self.krc))
 
     def writeSSLConfig(self):
         names = getHostnames()
