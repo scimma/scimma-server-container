@@ -1,9 +1,14 @@
 #!/usr/bin/python3
 from optparse import OptionParser
 import os
+import sys
 import time
 import signal      as sig
 import KafkaServer as ks
+
+## Line stdout and stderr
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', buffering=1)
+sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', buffering=1)
 
 ##
 ## Parse options.
