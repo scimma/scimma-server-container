@@ -74,7 +74,7 @@ class ServerContainer (multiprocessing.Process):
     ##
     ## Loop at most tries times. Return true if we can talk to the server, false otherwise.
     ## Each try times out after 5 seconds. Wait a second between tries.
-    def kafkaIsRunning (self, tries=5):
+    def kafkaIsRunning (self, tries=10):
         command = "nc %s 9092 -w 5" % self.name
         n = tries
         while n > 0:
