@@ -17,6 +17,8 @@ jobs:
         run:  make
       - name: installPython
         uses: actions/setup-python@v1
+      - name: install pytest
+        run:  pip3 install pytest
         with:
           python-version: '3.6'
       - name: test
