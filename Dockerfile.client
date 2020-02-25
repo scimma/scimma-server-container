@@ -6,5 +6,8 @@ RUN cd /usr/local/src && \
     python3 setup.py build  && \
     python3 setup.py install  
 RUN mkdir -p /root/.config && ln -s /root/shared/kafkacat.conf /root/.config/kafkacat.conf
+RUN pip3 install scimma-client==0.0.4
+RUN mkdir -p /root/test_data
+COPY test/data/example.gcn3 /root/test_data/example.gcn3
 WORKDIR /usr/bin
 CMD ["/bin/bash"]

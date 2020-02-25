@@ -48,3 +48,11 @@ def test_okIfSslAndGoodPasswd ():
     extraArgs += "sasl.mechanism=PLAIN -X sasl.username=test -X sasl.password=test-pass"
     command = "kafkacat -F /dev/null -L %s -b %s " % (extraArgs, server.brokerString())
     assert(server.runClientCommand(command) == 0)
+
+def test_scimmaPublishGCN ():
+    cnf = "/root/shared/kafkacat.conf"
+    brk = "kafka://%s/gcn" % server.brokerString()
+    gcn = "/root/test_data/example.gcn3"
+    command = "scimma publish -F %s -b %s %s" % (cnf, brk, gcn)
+    assert(server.runClientCommand(command) == 0)
+
