@@ -30,7 +30,7 @@ server: Dockerfile.server $(SRV_FILES)
 	docker tag $(SRV_IMG) $(SRV_LTST)
 
 test:
-	cd test && ./test.pl $(TAG)
+	cd test && SCIMMA_TEST_TAG=$(TAG) pytest -v
 
 set-release-tags:
 	@$(eval RELEASE_TAG := $(shell echo $(GITHUB_REF) | awk -F- '{print $$2}'))
