@@ -174,6 +174,8 @@ class Config:
                   ";\n"
         keyCertPasswords = ("ssl.truststore.password=%s\nssl.keystore.password=%s\nssl.key.password="
                             "%s\n") % (self.pwd, self.pwd, self.pwd)
+        addr = socket.gethostbyname(socket.getfqdn())
+        al   = "advertised.listeners"
         if self.noSec:
             kcIn = open(self.kcTemplateNA, "r")
             while True:
@@ -181,6 +183,7 @@ class Config:
                 if line == '':
                     kcIn.close()
                     break
+                line = re.sub('(ADVERTISED_LISTENERS)', "%s=PLAINTEXT://%s:9092" % (al, addr), line)
                 kcOut.write(line)
         else:
             kcIn = open(self.kcTemplate, "r")
@@ -191,5 +194,6 @@ class Config:
                     break
                 line = re.sub('(KAFKA_CREDENTIALS)', uCreds, line)
                 line = re.sub('(SSL_KEY_CERT_PASSWORDS)', keyCertPasswords, line)
+                line = re.sub('(ADVERTISED_LISTENERS)', "%s=SASL_SSL://%s:9092" % (al, addr), line)
                 kcOut.write(line)
         kcOut.close()

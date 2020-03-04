@@ -3,6 +3,7 @@
 ###
 broker.id=0
 listeners=PLAINTEXT://:9092
+ADVERTISED_LISTENERS
 
 num.network.threads=3
 num.io.threads=8

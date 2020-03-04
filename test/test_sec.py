@@ -1,4 +1,5 @@
 import TestUtils as tu
+import re
 
 def setup_module (module):
     global server
@@ -12,6 +13,19 @@ def teardown_module (module):
 
 def test_kafkaRunning ():
     assert(server.kafkaIsRunning())
+
+def test_expectedListenIP ():
+    expected = "broker 0 at %s:9092" % server.ipAddr()
+    print("expected: \"%s\"" % expected)
+    command  = "kafkacat -L -b %s" % server.brokerString()
+    lines    = server.runClientCommandWithOutput(command)
+    matched  = False
+    for line in lines:
+        print("matching line: \"%s\"" % line)
+        if line.find(expected) > -1:
+            matched = True
+            break
+    assert(matched)
 
 def test_publish ():
     command = "kafkacat -P -b %s -t test" % server.brokerString()

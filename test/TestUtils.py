@@ -51,7 +51,14 @@ class ServerContainer (multiprocessing.Process):
         print("COMMAND: %s" % " ".join([self.cmd] + self.args))
         child = subprocess.Popen([self.cmd] + self.args)
         child.wait()
-                    
+
+    def ipAddr (self):
+        format = "'{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'"
+        cmd = "docker inspect --format=%s %s" % (format, self.name)
+        line = subprocess.Popen([cmd], shell=True,
+                                stdout=subprocess.PIPE).stdout.read().decode().splitlines()[0]
+        return line.rstrip()
+
     def runClientCommand (self, cmd, opts=[]):
         command  = "docker run -i -v shared:/root/shared --rm=true --network=%s" % self.network
         command += " %s %s %s </dev/null" %  (" ".join(opts), self.cimage, cmd)
