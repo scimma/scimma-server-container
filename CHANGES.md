@@ -1,5 +1,20 @@
 # SCIMMA Server Container Changes
 
+## Mar 4, 2020
+
+Version 0.1.8
+
+   1. Replaced test framework with Python equivalent.
+
+   2. Added the scimma client to the client container.
+
+   3. Removed the docker-compose based use case.
+
+   4. Now explicitly configure Kafka to advertise a listener
+      with the IP address of the host instead of the hostname
+      of the host. The hostname of the host might not be
+      resolvable everywhere that might connect to the container.
+
 ## Feb 21, 2020
 
 Version 0.1.7
