@@ -22,6 +22,8 @@ docker network rm scimma-net
 
 ```
 
+The first kafkacat command (with the ``-P`` option) may appear to hang, but it is waiting for input. Each input line is a message. End with ``Ctrl-D`` or ``Ctrl-C``.
+
 The rest of this page just explains the above commands.
 
 ### Create a Network

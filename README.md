@@ -28,6 +28,7 @@ Documentation for basic use cases:
 
  1. [SCIMMA client development](doc/ClientDevelopment.md)
  2. [Quick Demo/Script](doc/QuickDemo.md)
+ 3. [Connect to dev HOPSKOTCH](doc/HopskotchDev.md)
 
 The SCIMMA Server Container is most definitely **NOT** an example of 
 best practice kafka infrastructure implementation. These
