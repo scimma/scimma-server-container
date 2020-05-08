@@ -1,5 +1,13 @@
 # SCIMMA Server Container Changes
 
+## May 8, 2020
+
+Version 0.1.9
+
+   1. Added "connect to HOP development infrastructure" use case.
+   
+   2. Updated hop client version to 0.0.5.
+
 ## Mar 4, 2020
 
 Version 0.1.8
