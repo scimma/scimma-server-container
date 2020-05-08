@@ -14,8 +14,8 @@ docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/clien
 docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest kafkacat -L -b scimma-server:9092
 docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest kafkacat -C -b scimma-server:9092 -t test -e
 
-docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest scimma publish  -F /root/shared/kafkacat.conf  -b kafka://scimma-server:9092/gcn /root/test_data/example.gcn3
-docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest kafkacat -C -b scimma-server:9092 -t gcn -e
+docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest hop publish -F /root/shared/kafkacat.conf kafka://scimma-server:9092/gcn /root/test_data/example.gcn3
+docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest hop subscribe -F /root/shared/kafkacat.conf -e kafka://scimma-server:9092/gcn
 
 docker kill scimma-server
 docker network rm scimma-net
@@ -117,20 +117,20 @@ the command:
 
 ### Publish a GCN
 ```
-docker run -i --network=scimma-net -v shared:/root/shared scimma/client:latest scimma publish  -F /root/shared/kafkacat.conf  -b kafka://scimma-server:9092/gcn /root/test_data/example.gcn3
+docker run -i --network=scimma-net -v shared:/root/shared scimma/client:latest hop publish -F /root/shared/kafkacat.conf kafka://scimma-server:9092/gcn /root/test_data/example.gcn3
 ```
 
-This command runs the scimma command in a container. The file ``example.gcn3`` is included as part of the container. You could mount a local directory
+This command runs the ``hop`` command in a container. The file ``example.gcn3`` is included as part of the container. You could mount a local directory
 containing GCNs as a volume in the client container and have the scimma client read files there.
 
 Note that the Kafka topic, ``gcn``, is specified as part of the URL.
 
 ### Read the GCN
 ```
-docker run -i --network=scimma-net -v shared:/root/shared scimma/client:latest kafkacat -C -b scimma-server:9092 -t gcn -e
+docker run -i --network=scimma-net -v shared:/root/shared scimma/client:latest hop subscribe -F /root/shared/kafkacat.conf -e kafka://scimma-server:9092/gcn
 ```
 
-This uses ``kafkacat`` in the client container to read the ``gcn`` topic.
+This uses ``hop`` in the client container to read the ``gcn`` topic.
 
 ### Clean Up
 
