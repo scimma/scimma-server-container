@@ -88,13 +88,14 @@ class Config:
     sslLog       = "/var/log/configureSSL.log"
     tlsDir       = "/root/shared/tls"
 
-    def __init__ (self, jDbg, noSec, pwd, ul, bu, bp):
+    def __init__ (self, jDbg, noSec, pwd, ul, bu, bp, al):
         self.jDbg   = jDbg
         self.noSec  = noSec
         self.pwd    = pwd
         self.ul     = ul
         self.bu     = bu
         self.bp     = bp
+        self.al     = al
 
     def write (self):
        self.writeSSLConfig()
@@ -175,18 +176,23 @@ class Config:
         keyCertPasswords = ("ssl.truststore.password=%s\nssl.keystore.password=%s\nssl.key.password="
                             "%s\n") % (self.pwd, self.pwd, self.pwd)
         addr = socket.gethostbyname(socket.getfqdn())
-        al   = "advertised.listeners"
+        if (self.al != None):
+            alStr = "advertised.listeners=%s" % self.al            
         if self.noSec:
             kcIn = open(self.kcTemplateNA, "r")
+            if (alStr == None):
+                alStr = "advertised.listeners=PLAINTEXT://%s:9092" % addr
             while True:
                 line = kcIn.readline()
                 if line == '':
                     kcIn.close()
                     break
-                line = re.sub('(ADVERTISED_LISTENERS)', "%s=PLAINTEXT://%s:9092" % (al, addr), line)
+                line = re.sub('(ADVERTISED_LISTENERS)', alStr, line)
                 kcOut.write(line)
         else:
             kcIn = open(self.kcTemplate, "r")
+            if (alStr == None):
+                alStr = "advertised.listeners=SASL_SSL://%s:9092" % addr
             while True:
                 line = kcIn.readline()
                 if line == '':
@@ -194,6 +200,7 @@ class Config:
                     break
                 line = re.sub('(KAFKA_CREDENTIALS)', uCreds, line)
                 line = re.sub('(SSL_KEY_CERT_PASSWORDS)', keyCertPasswords, line)
-                line = re.sub('(ADVERTISED_LISTENERS)', "%s=SASL_SSL://%s:9092" % (al, addr), line)
+                line = re.sub('(ADVERTISED_LISTENERS)', alStr, line)
+                line = re.sub('(ADVERTISED_LISTENERS)', 
                 kcOut.write(line)
         kcOut.close()
