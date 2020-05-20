@@ -201,6 +201,5 @@ class Config:
                 line = re.sub('(KAFKA_CREDENTIALS)', uCreds, line)
                 line = re.sub('(SSL_KEY_CERT_PASSWORDS)', keyCertPasswords, line)
                 line = re.sub('(ADVERTISED_LISTENERS)', alStr, line)
-                line = re.sub('(ADVERTISED_LISTENERS)', 
                 kcOut.write(line)
         kcOut.close()
