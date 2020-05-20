@@ -176,6 +176,7 @@ class Config:
         keyCertPasswords = ("ssl.truststore.password=%s\nssl.keystore.password=%s\nssl.key.password="
                             "%s\n") % (self.pwd, self.pwd, self.pwd)
         addr = socket.gethostbyname(socket.getfqdn())
+        alStr = None
         if (self.al != None):
             alStr = "advertised.listeners=%s" % self.al            
         if self.noSec:
