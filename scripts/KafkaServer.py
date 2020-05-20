@@ -204,3 +204,4 @@ class Config:
                 line = re.sub('(ADVERTISED_LISTENERS)', alStr, line)
                 kcOut.write(line)
         kcOut.close()
+        print(alStr)
