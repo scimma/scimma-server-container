@@ -22,13 +22,14 @@ p.add_option("","--brokerUser",dest="brokerUser",default="admin",help="broker us
 p.add_option("","--brokerPass",dest="brokerPass",default="admin-secret",help="broker password")
 p.add_option("","--users",dest="userList",default="test:test-pass",help=ulHelp)
 p.add_option("","--noSecurity",dest="noSec",default=False,action="store_true",help=noSecHelp)
+p.add_option("","--advertisedListener",dest="advertisedListener",help="advertised listener URL")
 p.add_option("","--javaDebugSSL",dest="javaDebugSSL",default=False,action="store_true",help=jdbHelp)
 (o, a) = p.parse_args()
 
 ##
 ## Write SSL, kafka, and kafkacat configuration files.
 ##
-config = ks.Config(o.javaDebugSSL, o.noSec, o.keyPass, o.userList, o.brokerUser, o.brokerPass)
+config = ks.Config(o.javaDebugSSL, o.noSec, o.keyPass, o.userList, o.brokerUser, o.brokerPass, o.advertisedListener)
 config.write()
 
 ##
