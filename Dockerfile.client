@@ -4,7 +4,8 @@ RUN cd /usr/local/src && \
     cd confluent-kafka-python && \
     git checkout v1.3.0 && \
     python3 setup.py build  && \
-    python3 setup.py install  
+    python3 setup.py install
+RUN yum install -y python2-toml
 RUN mkdir -p /root/.config && ln -s /root/shared/kafkacat.conf /root/.config/kafkacat.conf
 RUN pip3 install hop-client==0.1
 RUN mkdir -p /root/test_data
