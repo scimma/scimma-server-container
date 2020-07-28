@@ -174,10 +174,12 @@ class Config:
         if not self.noSec:
             username, password = self.ul.split(',')[0].split(':')
             config = {
-                "username": username,
-                "password": password,
-                "mechanism": "PLAIN",
-                "ssl_ca_location": self.tlsDir
+                "auth": {
+                    "username": username,
+                    "password": password,
+                    "mechanism": "PLAIN",
+                    "ssl_ca_location": self.tlsDir
+                }
             }
             with open(self.hopConfig, "w") as f:
                 toml.dump(config, f)
