@@ -7,6 +7,7 @@ COPY scripts/KafkaServer.py /root/KafkaServer.py
 COPY scripts/kafka-run-class.java_debug /usr/bin/kafka-run-class.java_debug
 RUN  chmod ugo+rx /root/runServer /usr/bin/kafka-run-class
 RUN  mkdir -p /root/shared/tls
+RUN yum install -y python36-toml
 WORKDIR /tmp
 EXPOSE 9092/tcp
 ENTRYPOINT ["/root/runServer"]

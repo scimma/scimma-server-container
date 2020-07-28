@@ -82,7 +82,7 @@ class Command(multiprocessing.Process):
 class Config:
 
     kcConfig     = "/root/shared/kafkacat.conf"
-    hopConfig    = "/root/shared/.config/hop/config.toml"
+    hopConfig    = "/root/shared/config.toml"
     kcTemplate   = "/etc/kafka/server.properties.auth"
     kcTemplateNA = "/etc/kafka/server.properties.no_auth"
     kConfig      = "/etc/kafka/server.properties"
