@@ -82,7 +82,7 @@ class Command(multiprocessing.Process):
 class Config:
 
     kcConfig     = "/root/shared/kafkacat.conf"
-    hopConfig    = "/root/shared/config.toml"
+    hopConfig    = "/root/shared/.config/hop/config.toml"
     kcTemplate   = "/etc/kafka/server.properties.auth"
     kcTemplateNA = "/etc/kafka/server.properties.no_auth"
     kConfig      = "/etc/kafka/server.properties"
@@ -176,7 +176,7 @@ class Config:
             config = {
                 "username": username,
                 "password": password,
-                "mechanism": "SASL_SSL",
+                "mechanism": "PLAIN",
                 "ssl_ca_location": self.tlsDir
             }
             with open(self.hopConfig, "w") as f:
