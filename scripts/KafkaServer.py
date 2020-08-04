@@ -178,7 +178,7 @@ class Config:
                     "username": username,
                     "password": password,
                     "mechanism": "PLAIN",
-                    "ssl_ca_location": self.tlsDir
+                    "ssl_ca_location": "%s/cacert.pem" % self.tlsDir
                 }
             }
             with open(self.hopConfig, "w") as f:

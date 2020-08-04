@@ -63,8 +63,8 @@ class ServerContainer (multiprocessing.Process):
         command  = "docker run -i -v shared:/root/shared --rm=true --network=%s" % self.network
         command += " %s %s %s </dev/null" %  (" ".join(opts), self.cimage, cmd)
         print("COMMAND: %s" % command)
-        return subprocess.Popen([command], shell=True, stdout=subprocess.PIPE,
-                                env=dict(os.environ, XDG_CONFIG_PATH="/root")).stdout.read().decode()
+        os.environ["XDG_CONFIG_HOME"] = "/root"
+        return os.system(command)
 
     def runClientCommandFileInput (self, cmd, fname, opts=[]):
         command  = "docker run -i -v shared:/root/shared --rm=true --network=%s " % self.network
@@ -89,7 +89,7 @@ class ServerContainer (multiprocessing.Process):
             n = n - 1
             if self.runClientCommand(command) == 0:
                   return True
-            time.sleep(1)
+            time.sleep(5*(tries - n))
         return False
 
     def terminate (self):
