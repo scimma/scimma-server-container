@@ -7,6 +7,8 @@ import os
 import sys
 import signal as sig
 
+import toml
+
 def getHostnames ():
     cmd   = "ip -4 -o address"
     lines = subprocess.Popen([cmd], shell=True,
@@ -80,6 +82,7 @@ class Command(multiprocessing.Process):
 class Config:
 
     kcConfig     = "/root/shared/kafkacat.conf"
+    hopConfig    = "/root/shared/config.toml"
     kcTemplate   = "/etc/kafka/server.properties.auth"
     kcTemplateNA = "/etc/kafka/server.properties.no_auth"
     kConfig      = "/etc/kafka/server.properties"
@@ -100,6 +103,7 @@ class Config:
     def write (self):
        self.writeSSLConfig()
        self.writeKafkacatConfig()
+       self.writeHopConfig()
        self.writeKafkaConfig()
        if self.jDbg:
            os.system("cp %s %s" % (self.krcDbg, self.krc))
@@ -160,12 +164,25 @@ class Config:
         f.close()
 
     def writeKafkacatConfig (self):
-        f = open(self.kcConfig, "w")
         if not self.noSec:
-            f.write("ssl.ca.location=%s/cacert.pem\nsecurity.protocol=SASL_SSL\n"
-                    "sasl.mechanism=PLAIN\nsasl.username=%s\nsasl.password="
-                    "%s\n" % tuple([self.tlsDir] + self.ul.split(',')[0].split(':')))
-        f.close()
+            with open(self.kcConfig, "w") as f:
+                f.write("ssl.ca.location=%s/cacert.pem\nsecurity.protocol=SASL_SSL\n"
+                        "sasl.mechanism=PLAIN\nsasl.username=%s\nsasl.password="
+                        "%s\n" % tuple([self.tlsDir] + self.ul.split(',')[0].split(':')))
+
+    def writeHopConfig (self):
+        if not self.noSec:
+            username, password = self.ul.split(',')[0].split(':')
+            config = {
+                "auth": {
+                    "username": username,
+                    "password": password,
+                    "mechanism": "PLAIN",
+                    "ssl_ca_location": "%s/cacert.pem" % self.tlsDir
+                }
+            }
+            with open(self.hopConfig, "w") as f:
+                toml.dump(config, f)
 
     def writeKafkaConfig (self):
         kcOut  = open(self.kConfig, "w")
