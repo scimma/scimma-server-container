@@ -1,11 +1,13 @@
 import TestUtils as tu
 import re
+import time
 
 def setup_module (module):
     global server
     tu.startNet("scimma-test")
     server = tu.ServerContainer(tu.testTag(), opts=["-v", "shared:/root/shared"])
     server.start()
+    time.sleep(30)
 
 def teardown_module (module):
     server.terminate()
