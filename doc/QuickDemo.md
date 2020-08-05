@@ -117,7 +117,7 @@ the command:
 
 ### Publish a GCN
 ```
-docker run -i --network=scimma-net -v shared:/root/shared scimma/client:latest hop publish -F /root/shared/kafkacat.conf kafka://scimma-server:9092/gcn /root/test_data/example.gcn3
+docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest hop publish kafka://scimma-server:9092/gcn /root/test_data/example.gcn3
 ```
 
 This command runs the ``hop`` command in a container. The file ``example.gcn3`` is included as part of the container. You could mount a local directory
@@ -127,10 +127,10 @@ Note that the Kafka topic, ``gcn``, is specified as part of the URL.
 
 ### Read the GCN
 ```
-docker run -i --network=scimma-net -v shared:/root/shared scimma/client:latest hop subscribe -F /root/shared/kafkacat.conf -e kafka://scimma-server:9092/gcn
+docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest hop subscribe -s EARLIEST  kafka://scimma-server:9092/gcn
 ```
 
-This uses ``hop`` in the client container to read the ``gcn`` topic.
+This uses ``hop`` in the client container to read the ``gcn`` topic starting from the first message.
 
 ### Clean Up
 
