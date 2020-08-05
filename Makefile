@@ -62,4 +62,5 @@ push: set-release-tags
 clean:
 	rm -f *~
 	rm -f downloads/*
+	if [ -d test/.cache ]; then rm -rf test/.cache; else /bin/true; fi
 	if [ -d downloads ]; then  rmdir downloads else /bin/true; fi

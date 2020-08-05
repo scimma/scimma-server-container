@@ -3,4 +3,4 @@
 downloads/*
 \#*
 __pycache__/
-
+test/.cache/*
