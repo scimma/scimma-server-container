@@ -3,7 +3,7 @@
 For SCIMMA client development on the user's host, it is convenient to use the SCIMMA server container like so:
 
 ```sh
-    docker run -p 9092:9092 --hostname localhost scimma/server
+    docker run --rm -p 9092:9092 --hostname localhost scimma/server
 
 ```
 

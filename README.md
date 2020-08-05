@@ -20,7 +20,6 @@ docker run -p 9092:9092 -it --rm -v /tmp/shared:/root/shared --hostname localhos
   0. VirtualBox (Mac Only)
   1. Build tools: GNU Make, curl, git (only if building the containers)
   2. Working docker installation
-  3. Working docker-compose installation
 
 ## Use Cases
 

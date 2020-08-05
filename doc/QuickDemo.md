@@ -14,8 +14,8 @@ docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/clien
 docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest kafkacat -L -b scimma-server:9092
 docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest kafkacat -C -b scimma-server:9092 -t test -e
 
-docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest hop publish -F /root/shared/kafkacat.conf kafka://scimma-server:9092/gcn /root/test_data/example.gcn3
-docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest hop subscribe -F /root/shared/kafkacat.conf -e kafka://scimma-server:9092/gcn
+docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest hop publish kafka://scimma-server:9092/gcn /root/test_data/example.gcn3
+docker run -i --rm=true --network=scimma-net -v shared:/root/shared scimma/client:latest hop subscribe -s EARLIEST kafka://scimma-server:9092/gcn 
 
 docker kill scimma-server
 docker network rm scimma-net

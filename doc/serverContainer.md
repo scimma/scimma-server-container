@@ -27,6 +27,7 @@ It takes serveral options:
     --users=USER:PASS,...
     --keyPass=KPASS
     --noSecurity
+    --advertisedListener LISTENER
     --javaDebugSSL
 ```
 
@@ -38,6 +39,8 @@ is _test:test-pass_.
 **KPASS** is used as the password for Java keystores and truststores and is generally not referenced by clients.
 
 The ``--noSecurity`` option disables SSL/TLS encryption and username/password authentication.
+
+The ``--advertisedListener`` option configures the kafka server to use LISTENER as the advertised listener.
 
 The ``--javaDebugSSL`` option turns on Java SSL debugging by adding ``-Djavax.net.debug=all`` to the command line. Debugging
 output goes to ``/var/log/kafka.err.RUN_NUM``. Note that this logs quite a bit of data including *all of the plaintext transmitted via SSL* and should not be used in production.

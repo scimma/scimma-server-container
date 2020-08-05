@@ -1,5 +1,17 @@
 # SCIMMA Server Container Changes
 
+## Aug 5, 2020
+
+Version 0.2.0
+
+  1. Updated hop client to version 0.1
+
+  2. Added ``--advertisedListener`` option to the server container.
+
+  3. In (doc/HopskotchDev.md), suggest using SCRAM credentials. The older
+     PLAIN credentials are on the road to deprecation. In a future release,
+     the server container will use SCRAM credentials like ``dev.hop``.
+
 ## May 8, 2020
 
 Version 0.1.9
@@ -123,3 +135,4 @@ has an installation of kafka without zookeper. You can run
 
 in the scimma-client container to verify that the client and server can communicate and that kafka is
 functioning.
+
