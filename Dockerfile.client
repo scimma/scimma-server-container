@@ -7,7 +7,7 @@ RUN cd /usr/local/src && \
     python3 setup.py install
 RUN mkdir -p /root/.config && ln -s /root/shared/kafkacat.conf /root/.config/kafkacat.conf
 RUN mkdir -p /root/.config/hop && ln -s /root/shared/config.toml /root/.config/hop/config.toml
-RUN pip3 install hop-client==0.1
+RUN pip3 install hop-client==0.2.0
 RUN mkdir -p /root/test_data
 COPY test/data/example.gcn3 /root/test_data/example.gcn3
 ENV XDG_CONFIG_PATH /root
