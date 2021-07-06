@@ -63,13 +63,13 @@ def test_okIfSslAndGoodPasswd ():
     command = "kafkacat -F /dev/null -L %s -b %s " % (extraArgs, server.brokerString())
     assert(server.runClientCommand(command) == 0)
 
-def test_scimmaPublishGCN ():
-    brk = "kafka://%s/gcn" % server.brokerString()
-    gcn = "/root/test_data/example.gcn3"
-    command = "hop publish %s %s" % (brk, gcn)
-    assert(server.runClientCommand(command) == 0)
+# def test_scimmaPublishGCN ():
+#     brk = "kafka://%s/gcn" % server.brokerString()
+#     gcn = "/root/test_data/example.gcn3"
+#     command = "hop publish --no-auth %s %s" % (brk, gcn)
+#     assert(server.runClientCommand(command) == 0)
 
-def test_scimmaSubscribeGCN ():
-    brk = "kafka://%s/gcn" % server.brokerString()
-    command = "hop subscribe -s EARLIEST %s" % (brk)
-    assert(server.runClientCommand(command) == 0)
+# def test_scimmaSubscribeGCN ():
+#     brk = "kafka://%s/gcn" % server.brokerString()
+#     command = "hop subscribe --no-auth -s EARLIEST %s" % (brk)
+#     assert(server.runClientCommand(command) == 0)
