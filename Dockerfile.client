@@ -1,4 +1,7 @@
 FROM scimma/base:0.3.0
+# python3-devel is needed for Python.h
+# This can be removed for scimma/base:0.3.1 and above
+RUN yum -y install python3-devel
 RUN cd /usr/local/src && \
     git clone https://github.com/confluentinc/confluent-kafka-python.git && \
     cd confluent-kafka-python && \
