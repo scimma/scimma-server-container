@@ -28,7 +28,7 @@ ssl.truststore.location=/root/shared/tls/kafka.server.truststore.jks
 ssl.keystore.location=/root/shared/tls/kafka.server.keystore.jks
 ssl.client.auth=requested
 SSL_KEY_CERT_PASSWORDS
-
+ssl.endpoint.identification.algorithm=
 
 ###
 ### Log Basics
