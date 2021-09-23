@@ -1,9 +1,9 @@
 # SCIMMA Server Container Changes
 
 ## Sep 23, 2021
-Version 0.5.1
+Version 0.5.2
 
-   1. Update scimma/base to scimma/base:0.3.1
+   1. Update scimma/base to scimma/base:0.3.2
 
 ## Sep 22, 2021
 Version 0.5.0
