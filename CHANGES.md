@@ -1,5 +1,11 @@
 # SCIMMA Server Container Changes
 
+## Feb 4, 2022
+Version 0.6.0
+
+   1. Update scimma/base to scimma/base:0.4.0
+      This changes the base operating system to Rocky Linux 8.5.
+
 ## Sep 30 2021
 Version 0.5.3
 
