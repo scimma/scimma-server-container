@@ -56,35 +56,22 @@ and can be pulled with the commands:
 
 Without building, you can use the containers on dockerhub.com using the docker-compose.yml file in this repository or direct docker commands.
 
-## Building
-
-The code is stored on github.com. Clone the repository:
+## Build
 
 ```
-   git clone git@github.com:scimma/scimma-server-container.git
+make
 ```
 
-Build the containers using GNU make:
+## Release
+
+Pushing to hub.docker.com is handled via a github workflow. To push a container based on
+the current master branch to AWS ECR with
+version MAJOR.MINOR.RELEASE (e.g., "0.0.7") do:
 
 ```
-   cd scimma-server-container
-   make
+git tag version-MAJOR.MINOR.RELEASE
+git push origin version-MAJOR.MINOR.RELEASE
 ```
-
-The make command will complain if the repository is not clean. The result of a successful build are two containers:
-
-``` sh
-    scimma/server:TAG
-    scimma/client:TAG
-```
-and two corresponding tags:
-
-``` sh
-    scimma/server:latest
-    scimma/client:latest
-```
-
-where TAG is the hash of the latest git commit. 
 
 ## OS Specific Notes
 
