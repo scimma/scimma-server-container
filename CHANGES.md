@@ -1,5 +1,10 @@
 # SCIMMA Server Container Changes
 
+## May 16, 2022
+Version 0.7.1
+
+   1. Update Hop client to version 0.5.1
+
 ## Apr 22, 2022
 Version 0.7.0
 
