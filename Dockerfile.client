@@ -1,4 +1,4 @@
-FROM scimma/base:0.5.0
+FROM scimma/base:0.5.1
 RUN cd /usr/local/src && \
     git clone https://github.com/confluentinc/confluent-kafka-python.git && \
     cd confluent-kafka-python && \
