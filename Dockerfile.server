@@ -1,4 +1,4 @@
-FROM scimma/base:0.5.1
+FROM scimma/base:0.5.2
 RUN  dnf install -y iproute
 COPY etc/zookeeper/zoo.cfg /opt/apache-zookeeper/conf/zookeeper.properties
 COPY etc/kafka/server.properties.auth    /etc/kafka/server.properties.auth
