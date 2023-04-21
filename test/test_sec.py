@@ -17,7 +17,7 @@ def test_kafkaRunning ():
 def test_expectedListenIP ():
     expected = "broker 0 at %s:9092" % server.ipAddr()
     print("expected: \"%s\"" % expected)
-    command  = "kcat -L -b %s" % server.brokerString()
+    command  = "/usr/local/bin/kcat -L -b %s" % server.brokerString()
     lines    = server.runClientCommandWithOutput(command)
     matched  = False
     for line in lines:
@@ -28,11 +28,11 @@ def test_expectedListenIP ():
     assert(matched)
 
 def test_publish ():
-    command = "kcat -P -b %s -t test" % server.brokerString()
+    command = "/usr/local/bin/kcat -P -b %s -t test" % server.brokerString()
     assert(server.runClientCommandFileInput(command, tu.messagesFile) == 0)
 
 def test_consume ():
-    command = "kcat -C -b %s -t test -e" % server.brokerString()
+    command = "/usr/local/bin/kcat -C -b %s -t test -e" % server.brokerString()
     lines = server.runClientCommandWithOutput(command)
     fh = open(tu.messagesFile, "r")
     flines = map(lambda x: x.strip(), fh.readlines())
@@ -48,19 +48,19 @@ def test_consume ():
     assert(result == True)
 
 def test_failIfNoClientSSL ():
-    command = "kcat -F /dev/null -L -b %s " % server.brokerString()
+    command = "/usr/local/bin/kcat -F /dev/null -L -b %s " % server.brokerString()
     assert(server.runClientCommand(command) != 0)
 
 def test_failIfSslAndBadPasswd ():
     extraArgs  = "-X ssl.ca.location=/root/shared/tls/cacert.pem -X security.protocol=SASL_SSL -X "
     extraArgs += "sasl.mechanism=PLAIN -X sasl.username=test -X sasl.password=foo"
-    command = "kcat -F /dev/null -L %s -b %s " % (extraArgs, server.brokerString())
+    command = "/usr/local/bin/kcat -F /dev/null -L %s -b %s " % (extraArgs, server.brokerString())
     assert(server.runClientCommand(command) != 0)
 
 def test_okIfSslAndGoodPasswd ():
     extraArgs  = "-X ssl.ca.location=/root/shared/tls/cacert.pem -X security.protocol=SASL_SSL -X "
     extraArgs += "sasl.mechanism=PLAIN -X sasl.username=test -X sasl.password=test-pass"
-    command = "kcat -F /dev/null -L %s -b %s " % (extraArgs, server.brokerString())
+    command = "/usr/local/bin/kcat -F /dev/null -L %s -b %s " % (extraArgs, server.brokerString())
     assert(server.runClientCommand(command) == 0)
 
 # def test_scimmaPublishGCN ():
