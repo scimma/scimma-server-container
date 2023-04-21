@@ -18,7 +18,7 @@ jobs:
       - name: installPython
         uses: actions/setup-python@v1
         with:
-          python-version: '3.6'
+          python-version: '3.9.16'
       - name: install pytest
         run:  pip3 install pytest
       - name: test
