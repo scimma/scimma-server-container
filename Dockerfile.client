@@ -2,7 +2,7 @@ FROM scimma/base:0.5.2
 RUN cd /usr/local/src && \
     git clone https://github.com/confluentinc/confluent-kafka-python.git && \
     cd confluent-kafka-python && \
-    git checkout v1.3.0 && \
+    git checkout v1.8.2 && \
     python3 setup.py build  && \
     python3 setup.py install
 RUN mkdir -p /root/.config && ln -s /root/shared/kafkacat.conf /root/.config/kafkacat.conf
