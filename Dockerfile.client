@@ -8,7 +8,7 @@ RUN cd /usr/local/src && \
 RUN mkdir -p /root/.config && ln -s /root/shared/kafkacat.conf /root/.config/kafkacat.conf
 RUN mkdir -p /root/.config/hop && ln -s /root/shared/config.toml /root/.config/hop/auth.toml
 RUN pip3 install -U pip
-RUN pip3 install -U hop-client==0.8.0
+RUN pip3 install -U hop-client==0.11.1
 RUN mkdir -p /root/test_data
 COPY test/data/example.gcn3 /root/test_data/example.gcn3
 ENV XDG_CONFIG_PATH /root
