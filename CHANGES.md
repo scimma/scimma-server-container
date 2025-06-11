@@ -2,8 +2,9 @@
 ## Jun 11, 2025
 Version 0.9.0
 
-    1. Update to hop-client version 0.11.1
+    1. Update to hop-client version 0.10.1
     2. Update to scimma/base:0.6.0
+    3. The update to hop-client 0.10.1 removes support for Python 3.6
 
 ## May 25, 2023
 Version 0.8.1
