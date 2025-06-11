@@ -7,8 +7,7 @@ RUN cd /usr/local/src && dnf install -y python3.12-pip.noarch python3.12-setupto
     python3.12 setup.py install && cd && rm -rf /usr/local/src/confluent-kafka-python
 RUN mkdir -p /root/.config && ln -s /root/shared/kafkacat.conf /root/.config/kafkacat.conf
 RUN mkdir -p /root/.config/hop && ln -s /root/shared/config.toml /root/.config/hop/auth.toml
-RUN pip3 install -U pip &&  pip3 install -U hop-client==0.11.1
-RUN pip3.12 install -U pip &&  pip3.12 install -U hop-client==0.11.1
+RUN pip3.12 install -U pip &&  pip3.12 install -U hop-client==0.10.1
 RUN mkdir -p /root/test_data
 COPY test/data/example.gcn3 /root/test_data/example.gcn3
 ENV XDG_CONFIG_PATH /root
